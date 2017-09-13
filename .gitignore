@@ -1,0 +1,11 @@
+target
+*.go
+/.idea/
+.DS_Store
+*.rs.bk
+/.vscode/
+SDL2.dll
+/gnu-mingw/
+/msvc/
+rls*.log
+.profile

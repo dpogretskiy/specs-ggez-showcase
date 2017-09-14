@@ -1,5 +1,5 @@
 [package]
-name = "guide"
+name = "special"
 version = "0.1.0"
 authors = ["Dmitriy Pogretskiy <dpogretskiy@gmail.com>"]
 build = "build.rs"
@@ -10,6 +10,7 @@ serde_json = "*"
 nalgebra = "0.13"
 specs = "*"
 specs-derive = "*"
+rayon = "0.7.1"
 
 [dependencies.tilesheet-marker]
 path = "../spritesheet-marker"

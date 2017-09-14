@@ -1,6 +1,6 @@
-use super::Vector2;
 
 use physics::*;
+use util::*;
 
 #[derive(Debug, Clone)]
 pub struct AABB {

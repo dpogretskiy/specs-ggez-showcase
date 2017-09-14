@@ -1,0 +1,12 @@
+array_layout = "Block"
+array_width = 1000
+array_horizontal_layout_threshold = 1000
+chain_one_line_max = 80
+control_brace_style = "AlwaysSameLine"
+error_on_line_overflow = false
+fn_brace_style = "PreferSameLine"
+item_brace_style = "PreferSameLine"
+
+reorder_imported_names = true
+reorder_imports = true
+reorder_imports_in_group = true

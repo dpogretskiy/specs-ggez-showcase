@@ -1,6 +1,6 @@
 
-use super::Vector2;
 use na;
+use util::Vector2;
 
 pub struct Terrain {
     pub terrain: Vec<Vec<TileType>>,

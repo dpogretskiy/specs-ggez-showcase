@@ -4,8 +4,8 @@ use super::LoadedAssets;
 use marker::*;
 use marker::geom::Rect;
 
-use ggez::graphics::spritebatch::*;
 use ggez::graphics::Image;
+use ggez::graphics::spritebatch::*;
 
 use rand;
 
@@ -55,9 +55,7 @@ impl LevelAssetIndex {
                 &SpriteType::Platform {
                     horizontal: ref hor,
                 } => for h in hor.iter() {
-                    platform_hor
-                        .entry(h.clone())
-                        .or_insert({ vec![gd.on_screen_frame.clone()] });
+                    platform_hor.entry(h.clone()).or_insert({ vec![gd.on_screen_frame.clone()] });
                 },
                 &SpriteType::Object => ground_obj.push(gd.on_screen_frame.clone()),
             }

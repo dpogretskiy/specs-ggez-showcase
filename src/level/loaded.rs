@@ -1,4 +1,3 @@
-
 use super::*;
 
 use sprite::Loader;
@@ -14,7 +13,7 @@ pub struct LoadedAssets {
 }
 
 impl LoadedAssets {
-    pub fn load_assets<'a>(ctx: &mut Context, tpe: LevelType) -> GameResult<LoadedAssets> {
+    pub fn load_assets(ctx: &mut Context, tpe: LevelType) -> GameResult<LoadedAssets> {
         let (g, o, bg) = match tpe {
             LevelType::Graveyard => {
                 let g = Loader::load_sprite_sheet(ctx, "/level/graveyard/level_ground")?;

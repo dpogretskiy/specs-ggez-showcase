@@ -1,25 +1,13 @@
+use player::state_machine::StateMachine;
+use player::systems::PlayerSystemData;
 use specs::*;
 
 #[derive(Debug, Component, Default)]
 #[component(NullStorage)]
 pub struct Controlled;
 
-#[derive(Debug, Component, Default)]
-#[component(NullStorage)]
-pub struct IdlePlayer;
-
-#[derive(Debug, Component, Default)]
-#[component(NullStorage)]
-pub struct RunningPlayer;
-
-#[derive(Debug, Component, Default)]
-#[component(NullStorage)]
-pub struct JumpingPlayer;
-
-#[derive(Debug, Component, Default)]
-#[component(NullStorage)]
-pub struct SlidingPlayer;
-
-#[derive(Debug, Component, Default)]
-#[component(NullStorage)]
-pub struct AttackingPlayer;
+#[derive(Component)]
+#[component(HashMapStorage)]
+pub struct PlayerStateMachine {
+    machine: StateMachine<PlayerSystemData<'static>>,
+}

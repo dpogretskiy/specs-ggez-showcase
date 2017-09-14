@@ -1,6 +1,8 @@
 mod components;
 mod systems;
 mod consts;
+mod state;
+mod state_machine;
 
 use asset_storage::*;
 use components::*;

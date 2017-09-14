@@ -2,28 +2,79 @@ use ggez::*;
 use ggez::event::*;
 use level::*;
 
-use util::Vector2;
-use specs::*;
-use resources::*;
+use asset_storage::*;
+use camera::*;
 use components::*;
 use physics::components::*;
 use physics::systems::*;
-use camera::*;
+use player::*;
+use resources::*;
+use specs::*;
 use std::time::Duration;
+use systems::*;
+use util::Vector2;
 
 pub struct Game<'a, 'b> {
-    world: World,
-    dispatcher: Dispatcher<'a, 'b>,
+    pub world: World,
+    pub dispatcher: Dispatcher<'a, 'b>,
 }
 
 impl<'a, 'b> Game<'a, 'b> {
-    pub fn new(ctx: &mut Context) -> GameResult<Game> {
+    pub fn new(ctx: &mut Context) -> GameResult<Game<'a, 'b>> {
         let mut world = World::new();
-        let level = Level::load(ctx, LevelType::Graveyard)?;
-        let level = RenderableLevel::build(level);
 
-        world.add_resource(DeltaTime {time: Duration::from_secs(0)});
-        world.add_resource(LevelTerrain {terrain: level.terrain});
+        world.register::<Position>();
+        world.register::<MovingObject>();
+        world.register::<HasAABB>();
+        world.register::<Renderable>();
+        world.register::<Scalable>();
+        world.register::<Directional>();
+        //load everything!
+        {
+            let mut asset_storage = AssetStorage::empty();
+
+            //level part
+            {
+                let level = Level::load(ctx, LevelType::Graveyard)?;
+                let RenderableLevel {
+                    background,
+                    ground_batch,
+                    objects_batch,
+                    terrain,
+                } = RenderableLevel::build(level);
+                asset_storage.images.insert("level-background", background);
+                asset_storage.batches.insert("level-ground", ground_batch);
+                asset_storage.batches.insert("level-objects", objects_batch);
+                world.add_resource(LevelTerrain { terrain });
+            }
+            //player part
+            {
+                PlayerLoader::load_assets(ctx, &mut asset_storage)?;
+            }
+            world.add_resource::<AssetStorage>(asset_storage);
+        }
+
+        world
+            .create_entity()
+            .with(Position::new(0.0, 0.0))
+            .with(Renderable {
+                layer: 1,
+                tpe: RenderableType::Batch { id: "level-ground" },
+            })
+            .build();
+
+        world
+            .create_entity()
+            .with(Position::new(0.0, 0.0))
+            .with(Renderable {
+                layer: 0,
+                tpe: RenderableType::Image { id: "level-background" },
+            })
+            .with(Scalable::new(2.0, 2.0))
+            .build();
+
+
+        world.add_resource(DeltaTime { time: Duration::from_secs(0) });
         world.add_resource(PlayerInput::new());
 
         let (w, h) = (ctx.conf.window_width, ctx.conf.window_height);
@@ -31,24 +82,23 @@ impl<'a, 'b> Game<'a, 'b> {
         let fov = w as f64 * 1.5;
         world.add_resource(Camera::new(w, h, fov, hc * fov));
 
-        world.register::<Position>();
-        world.register::<MovingObject>();
-        world.register::<HasAABB>();
-        world.register::<Renderable>();
-
-        let dispatcher = DispatcherBuilder::new()
+        let dispatcher: Dispatcher<'a, 'b> = DispatcherBuilder::new()
             .add(MovingSystem, "moving", &[])
-            .add(HasAABBSystem, "has_aabb", &[])
+            .add(HasAABBSystem, "has_aabb", &["moving"])
             .add(PositionSystem, "position", &["moving", "has_aabb"])
+            .add(CameraSnapSystem, "camera_snap", &["position"])
             .build();
 
-        Ok(Game{world, dispatcher})
+        Ok(Game { world, dispatcher })
     }
 }
 
 impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
-        fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
 
+        if timer::get_ticks(ctx) % 1000 == 0 {
+            println!("FPS: {}", timer::get_fps(ctx));
+        }
         // self.player_sm.handle_events(&mut self.player);
 
         // self.player_sm.update(&mut self.player, &dt, &self.level.terrain);
@@ -74,6 +124,11 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
+
+        {
+            let mut rs = RenderingSystem::new(ctx);
+            rs.run_now(&mut self.world.res);
+        }
 
         // let camera = &self.camera;
 
@@ -161,11 +216,13 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
                     input.left = false
                 }
             }
-            Axis::LeftY => if value > 7500 {
-                input.down = true
-            } else {
-                input.down = false
-            },
+            Axis::LeftY => {
+                if value > 7500 {
+                    input.down = true
+                } else {
+                    input.down = false
+                }
+            }
             _ => (),
         }
     }
@@ -183,5 +240,4 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
             // ));
         }
     }
-
 }

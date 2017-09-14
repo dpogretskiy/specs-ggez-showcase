@@ -1,0 +1,172 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__000.png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.1,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 376.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__001.png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.2,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 752.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__002.png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.3,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1128.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__003.png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.4,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1504.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__004.png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1880.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__005.png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2256.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__006.png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.7,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2632.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__007.png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.8,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 3008.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__008.png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.9,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 3384.0,
+      "y": 0.0,
+      "w": 376.0,
+      "h": 520.0
+    },
+    "markers": "Object",
+    "name": "Run__009.png",
+    "index": 9
+  }
+]

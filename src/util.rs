@@ -1,4 +1,3 @@
-
 use na;
 use std::time::Duration;
 

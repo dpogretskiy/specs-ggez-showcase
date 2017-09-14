@@ -1,0 +1,172 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__000.png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.1,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 290.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__001.png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.2,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 580.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__002.png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.3,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 870.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__003.png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.4,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1160.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__004.png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1450.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__005.png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1740.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__006.png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.7,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2030.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__007.png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.8,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2320.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__008.png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.9,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2610.0,
+      "y": 0.0,
+      "w": 290.0,
+      "h": 500.0
+    },
+    "markers": "Object",
+    "name": "Idle__009.png",
+    "index": 9
+  }
+]

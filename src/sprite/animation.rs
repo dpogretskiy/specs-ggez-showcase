@@ -1,6 +1,6 @@
 use super::MarkedTiles;
 
-use ggez::graphics::{Rect, Image};
+use ggez::graphics::{Image, Rect};
 
 pub struct Animation {
     pub image: Image,
@@ -14,7 +14,7 @@ impl Animation {
 
         Animation {
             image: mt.image,
-            frames: mt.data.iter().map(|f| Rect::from(f.on_screen_frame)).collect(),
+            frames: mt.data.iter().map(|f| Rect::from(f.on_screen_frame.clone())).collect(),
             length,
         }
     }

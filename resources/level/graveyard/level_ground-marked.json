@@ -1,0 +1,438 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": "Object",
+    "name": "Bone (1).png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.25,
+      "y": 0.0,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 128.0,
+      "y": 0.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": "Object",
+    "name": "Bone (2).png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.0,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 256.0,
+      "y": 0.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": "Object",
+    "name": "Bone (3).png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.75,
+      "y": 0.0,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 384.0,
+      "y": 0.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": "Object",
+    "name": "Bone (4).png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.2,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 128.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "LT"
+        ]
+      }
+    },
+    "name": "Tile (1).png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.25,
+      "y": 0.2,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 128.0,
+      "y": 128.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "MT"
+        ]
+      }
+    },
+    "name": "Tile (2).png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.2,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 256.0,
+      "y": 128.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "RT"
+        ]
+      }
+    },
+    "name": "Tile (3).png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.75,
+      "y": 0.2,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 384.0,
+      "y": 128.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "LM"
+        ]
+      }
+    },
+    "name": "Tile (4).png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.4,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 256.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "MM"
+        ]
+      }
+    },
+    "name": "Tile (5).png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.25,
+      "y": 0.4,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 128.0,
+      "y": 256.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "RM"
+        ]
+      }
+    },
+    "name": "Tile (6).png",
+    "index": 9
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.4,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 256.0,
+      "y": 256.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "IRT"
+        ]
+      }
+    },
+    "name": "Tile (7).png",
+    "index": 10
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.75,
+      "y": 0.4,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 384.0,
+      "y": 256.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "IBR"
+        ]
+      }
+    },
+    "name": "Tile (8).png",
+    "index": 11
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.6,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 384.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "MB"
+        ]
+      }
+    },
+    "name": "Tile (9).png",
+    "index": 12
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.25,
+      "y": 0.6,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 128.0,
+      "y": 384.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "IBL"
+        ]
+      }
+    },
+    "name": "Tile (10).png",
+    "index": 13
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.6,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 256.0,
+      "y": 384.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "ILT"
+        ]
+      }
+    },
+    "name": "Tile (11).png",
+    "index": 14
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.75,
+      "y": 0.6,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 384.0,
+      "y": 384.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "LB"
+        ]
+      }
+    },
+    "name": "Tile (12).png",
+    "index": 15
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.8,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 512.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Ground": {
+        "square": [
+          "RB"
+        ]
+      }
+    },
+    "name": "Tile (13).png",
+    "index": 16
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.25,
+      "y": 0.8,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 128.0,
+      "y": 512.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Platform": {
+        "horizontal": [
+          "Left"
+        ]
+      }
+    },
+    "name": "Tile (14).png",
+    "index": 17
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.8,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 256.0,
+      "y": 512.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Platform": {
+        "horizontal": [
+          "Center"
+        ]
+      }
+    },
+    "name": "Tile (15).png",
+    "index": 18
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.75,
+      "y": 0.8,
+      "w": 0.25,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 384.0,
+      "y": 512.0,
+      "w": 128.0,
+      "h": 128.0
+    },
+    "markers": {
+      "Platform": {
+        "horizontal": [
+          "Right"
+        ]
+      }
+    },
+    "name": "Tile (16).png",
+    "index": 19
+  }
+]

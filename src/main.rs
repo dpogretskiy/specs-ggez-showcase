@@ -18,9 +18,10 @@ mod level;
 mod game;
 mod camera;
 mod asset_storage;
+mod player;
 
 use game::*;
-use ggez::{conf, event, graphics, Context};
+use ggez::{Context, conf, event, graphics};
 
 fn main() {
     let c = conf::Conf {
@@ -32,8 +33,9 @@ fn main() {
     };
     let ctx = &mut Context::load_from_conf("config", "me", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
-    println!("{:?}", graphics::get_renderer_info(ctx));
+    println!("{:?}", graphics::get_renderer_info(ctx).unwrap());
 
     let mut state = Game::new(ctx).unwrap();
+
     event::run(ctx, &mut state).unwrap();
 }

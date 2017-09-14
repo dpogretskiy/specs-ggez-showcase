@@ -25,17 +25,15 @@ impl<'a> System<'a> for MovingSystem {
 
 pub struct HasAABBSystem;
 impl<'a> System<'a> for HasAABBSystem {
-    type SystemData = (
-        WriteStorage<'a, HasAABB>,
-        WriteStorage<'a, MovingObject>,
-        Fetch<'a, LevelTerrain>,
-    );
+    type SystemData = (WriteStorage<'a, HasAABB>,
+     WriteStorage<'a, MovingObject>,
+     Fetch<'a, LevelTerrain>);
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut has_aabb, mut mv, level) = data;
         let terrain = &level.terrain;
 
-        (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
+        (&mut has_aabb, &mut mv).par_join().for_each(|(ref mut bb, ref mut mv)| {
             bb.was_on_ground = bb.on_ground;
             bb.was_at_ceiling = bb.at_ceiling;
             bb.pushed_left_wall = bb.pushes_left_wall;
@@ -48,7 +46,8 @@ impl<'a> System<'a> for HasAABBSystem {
 
             bb.on_platform = false;
 
-            if mv.velocity.y <= 0.0 && HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
+            if mv.velocity.y <= 0.0 &&
+                HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
             {
                 mv.position.y = ground_y + bb.aabb.half_size.y - bb.aabb.offset.y;
                 mv.velocity.y = 0.0;
@@ -106,7 +105,7 @@ impl<'a> System<'a> for PositionSystem {
 
     fn run(&mut self, data: Self::SystemData) {
         let (mv, mut pos) = data;
-        (&mv, &mut pos).par_join().for_each(|(&mv, &mut pos)| {
+        (&mv, &mut pos).par_join().for_each(|(ref mv, ref mut pos)| {
             pos.x = mv.position.x as f32;
             pos.y = mv.position.y as f32;
         });

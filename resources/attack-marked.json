@@ -1,0 +1,172 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__000.png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.33333334,
+      "y": 0.0,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 524.0,
+      "y": 0.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__001.png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6666667,
+      "y": 0.0,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 1048.0,
+      "y": 0.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__002.png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.25,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 565.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__003.png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.33333334,
+      "y": 0.25,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 524.0,
+      "y": 565.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__004.png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6666667,
+      "y": 0.25,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 1048.0,
+      "y": 565.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__005.png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.5,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 1130.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__006.png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.33333334,
+      "y": 0.5,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 524.0,
+      "y": 1130.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__007.png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6666667,
+      "y": 0.5,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 1048.0,
+      "y": 1130.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__008.png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.75,
+      "w": 0.33333334,
+      "h": 0.25
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 1695.0,
+      "w": 524.0,
+      "h": 565.0
+    },
+    "markers": "Object",
+    "name": "Attack__009.png",
+    "index": 9
+  }
+]

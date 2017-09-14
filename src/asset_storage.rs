@@ -1,7 +1,7 @@
-use ggez::graphics::{Image, Drawable};
+use ggez::graphics::Image;
 use ggez::graphics::spritebatch::SpriteBatch;
-use std::collections::HashMap;
 use sprite::animation::Animation;
+use std::collections::HashMap;
 
 pub struct AssetStorage {
     pub images: HashMap<&'static str, Image>,
@@ -18,7 +18,7 @@ impl AssetStorage {
         AssetStorage {
             images: m1,
             animations: m2,
-            batches: m3
+            batches: m3,
         }
     }
 }

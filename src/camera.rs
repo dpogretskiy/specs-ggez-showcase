@@ -16,12 +16,12 @@
 
 // TODO: Debug functions to draw world and camera grid!
 
-use util::Vector2;
 use ggez;
 use ggez::GameResult;
 use ggez::graphics;
 use ggez::graphics::DrawParam;
 use na;
+use util::Vector2;
 
 // Hmm.  Could, instead, use a 2d transformation
 // matrix, or create one of such.

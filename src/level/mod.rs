@@ -2,10 +2,10 @@ mod index;
 mod loaded;
 mod terrain;
 
-use util::Vector2;
 use ggez::{Context, GameResult};
 use ggez::graphics::Image;
 use std::rc::Rc;
+use util::Vector2;
 
 use marker::geom::*;
 use sprite::MarkedTiles;
@@ -1092,7 +1092,8 @@ impl Level {
 
 pub struct RenderableLevel {
     pub background: Image,
-    pub sprites: Vec<SpriteBatch>,
+    pub ground_batch: SpriteBatch,
+    pub objects_batch: SpriteBatch,
     pub terrain: Terrain,
 }
 
@@ -1273,7 +1274,7 @@ impl RenderableLevel {
                             src: graphics::Rect::from(rect),
                             dest: graphics::Point::new(
                                 (h * 128) as f32,
-                                (pixel_height - v * 128) as f32,
+                                -((pixel_height - v * 128) as f32),
                             ),
                             scale: graphics::Point::new(1.0, 1.0),
                             ..Default::default()
@@ -1288,7 +1289,8 @@ impl RenderableLevel {
         terrain_vec.reverse();
         RenderableLevel {
             background: bg,
-            sprites: vec![g_batch, o_batch],
+            ground_batch: g_batch,
+            objects_batch: o_batch,
             terrain: Terrain {
                 terrain: terrain_vec,
                 position: Vector2::new(0.0, 128.0),
@@ -1297,14 +1299,5 @@ impl RenderableLevel {
                 tile_size: 128.0,
             },
         }
-    }
-}
-
-impl Drawable for RenderableLevel {
-    fn draw_ex(&self, ctx: &mut Context, param: DrawParam) -> GameResult<()> {
-        for spr in self.sprites.iter() {
-            spr.draw_ex(ctx, param)?;
-        }
-        Ok(())
     }
 }

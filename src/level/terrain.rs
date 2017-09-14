@@ -1,4 +1,3 @@
-
 use na;
 use util::Vector2;
 

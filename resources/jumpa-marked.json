@@ -1,0 +1,172 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__000.png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.0,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 495.0,
+      "y": 0.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__001.png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.2,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 583.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__002.png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.2,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 495.0,
+      "y": 583.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__003.png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.4,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 1166.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__004.png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.4,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 495.0,
+      "y": 1166.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__005.png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.6,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 1749.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__006.png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.6,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 495.0,
+      "y": 1749.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__007.png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.8,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 2332.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__008.png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.8,
+      "w": 0.5,
+      "h": 0.2
+    },
+    "frame": {
+      "x": 495.0,
+      "y": 2332.0,
+      "w": 495.0,
+      "h": 583.0
+    },
+    "markers": "Object",
+    "name": "Jump_Attack__009.png",
+    "index": 9
+  }
+]

@@ -1,0 +1,172 @@
+[
+  {
+    "on_screen_frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 0.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__000.png",
+    "index": 0
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.1,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 399.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__001.png",
+    "index": 1
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.2,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 798.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__002.png",
+    "index": 2
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.3,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1197.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__003.png",
+    "index": 3
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.4,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1596.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__004.png",
+    "index": 4
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.5,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 1995.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__005.png",
+    "index": 5
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.6,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2394.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__006.png",
+    "index": 6
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.7,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 2793.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__007.png",
+    "index": 7
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.8,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 3192.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__008.png",
+    "index": 8
+  },
+  {
+    "on_screen_frame": {
+      "x": 0.9,
+      "y": 0.0,
+      "w": 0.1,
+      "h": 1.0
+    },
+    "frame": {
+      "x": 3591.0,
+      "y": 0.0,
+      "w": 399.0,
+      "h": 543.0
+    },
+    "markers": "Object",
+    "name": "Jump__009.png",
+    "index": 9
+  }
+]

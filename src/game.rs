@@ -5,13 +5,17 @@ use level::*;
 use asset_storage::*;
 use camera::*;
 use components::*;
-use physics::components::*;
-use physics::systems::*;
 use player::*;
 use resources::*;
 use specs::*;
 use std::time::Duration;
 use systems::*;
+use player;
+
+use player::animation_defs::PlayerAnimations;
+use physics::AABB;
+
+
 use util::Vector2;
 
 pub struct Game<'a, 'b> {
@@ -29,6 +33,12 @@ impl<'a, 'b> Game<'a, 'b> {
         world.register::<Renderable>();
         world.register::<Scalable>();
         world.register::<Directional>();
+        world.register::<HasAnimationSequence>();
+        world.register::<PlayerStateMachine>();
+        world.register::<Controlled>();
+        world.register::<SnapCamera>();
+        world.register::<StartPSM>();
+        
         //load everything!
         {
             let mut asset_storage = AssetStorage::empty();
@@ -68,13 +78,32 @@ impl<'a, 'b> Game<'a, 'b> {
             .with(Position::new(0.0, 0.0))
             .with(Renderable {
                 layer: 0,
-                tpe: RenderableType::Image { id: "level-background" },
+                tpe: RenderableType::Image {
+                    id: "level-background",
+                },
             })
             .with(Scalable::new(2.0, 2.0))
             .build();
 
+        let mut psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
 
-        world.add_resource(DeltaTime { time: Duration::from_secs(0) });
+        world.create_entity()
+            .with(Position::new(0.0, 0.0))
+            .with(Renderable{ layer: 5, tpe: RenderableType::Animation { id: "player-idle", frame: 0, length: 10 }})
+            .with(HasAnimationSequence { sequence: PlayerAnimations::idle() })
+            .with(Controlled)
+            .with(psm)
+            .with(StartPSM)
+            .with(SnapCamera)
+            .with(Directional::Right)
+            .with(Scalable::new(0.4, 0.4))
+            .with(MovingObject::new(Vector2::new(300.0, 500.0)))
+            .with(HasAABB::new(AABB::new_full(Vector2::new(300.0, 500.0), Vector2::new(290.0, 500.0), Vector2::new(0.4, 0.4))))
+            .build();
+
+        world.add_resource(DeltaTime {
+            time: Duration::from_secs(0),
+        });
         world.add_resource(PlayerInput::new());
 
         let (w, h) = (ctx.conf.window_width, ctx.conf.window_height);
@@ -83,7 +112,19 @@ impl<'a, 'b> Game<'a, 'b> {
         world.add_resource(Camera::new(w, h, fov, hc * fov));
 
         let dispatcher: Dispatcher<'a, 'b> = DispatcherBuilder::new()
-            .add(MovingSystem, "moving", &[])
+            .add(StartPSMSystem, "start-state-machines", &[])
+            .add(PlayerDirectionSystem, "player.direct", &[])
+            .add(
+                PlayerHandleEventsSystem,
+                "player_sm.handle_events",
+                &["player.direct"],
+            )
+            .add(
+                PlayerUpdateSystem,
+                "player_sm.update",
+                &["player_sm.handle_events"],
+            )
+            .add(MovingSystem, "moving", &["player_sm.update"])
             .add(HasAABBSystem, "has_aabb", &["moving"])
             .add(PositionSystem, "position", &["moving", "has_aabb"])
             .add(CameraSnapSystem, "camera_snap", &["position"])
@@ -95,29 +136,17 @@ impl<'a, 'b> Game<'a, 'b> {
 
 impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
-
         if timer::get_ticks(ctx) % 1000 == 0 {
             println!("FPS: {}", timer::get_fps(ctx));
         }
-        // self.player_sm.handle_events(&mut self.player);
 
-        // self.player_sm.update(&mut self.player, &dt, &self.level.terrain);
-        // if timer::check_update_time(ctx, 30) {
-        //     self.player_sm.fixed_update(&mut self.player);
-        // };
+        if timer::check_update_time(ctx, 30) {
+            PlayerFixedUpdateSystem.run_now(&mut self.world.res);
+            AnimationFFSystem.run_now(&mut self.world.res);
+        }
 
-        // for mut b in self.boxes.iter_mut() {
-        //     b.update(&dt, &self.level.terrain)
-        // }
-
-        // if timer::get_ticks(ctx) % 100 == 0 {
-        //     println!("Average FPS: {}", timer::get_fps(ctx));
-        // }
-
-        // self.camera.move_to(self.player.mv.position);
-        // let update_end = timer::get_time_since_start(ctx);
-        // let delta = update_end - update_start;
-        // println!("Fps: {}", timer::get_fps(ctx));
+        self.dispatcher.dispatch(&mut self.world.res);
+        self.world.maintain();
 
         Ok(())
     }
@@ -129,30 +158,6 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
             let mut rs = RenderingSystem::new(ctx);
             rs.run_now(&mut self.world.res);
         }
-
-        // let camera = &self.camera;
-
-        // let bd_dp = graphics::DrawParam {
-        //     src: graphics::Rect::new(0.0, 0.0, 1.0, 1.0),
-        //     scale: graphics::Point::new(2.0, 2.0),
-        //     dest: graphics::Point::new(
-        //         camera.location().x as f32 * 0.9,
-        //         camera.location().y as f32 * 0.9,
-        //     ),
-        //     ..Default::default()
-        // };
-
-        // self.level.background.draw_ex_camera(camera, ctx, bd_dp)?;
-
-        // self.player_sm.draw(ctx, camera, &self.player);
-
-        // // for b in self.boxes.iter() {
-        // //     b.draw_cam(ctx, camera);
-        // // }
-
-        // for batch in self.level.sprites.iter() {
-        //     batch.draw_ex_camera(camera, ctx, graphics::DrawParam::default())?;
-        // }
 
         graphics::present(ctx);
 
@@ -216,13 +221,11 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
                     input.left = false
                 }
             }
-            Axis::LeftY => {
-                if value > 7500 {
-                    input.down = true
-                } else {
-                    input.down = false
-                }
-            }
+            Axis::LeftY => if value > 7500 {
+                input.down = true
+            } else {
+                input.down = false
+            },
             _ => (),
         }
     }

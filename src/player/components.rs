@@ -9,5 +9,9 @@ pub struct Controlled;
 #[derive(Component)]
 #[component(HashMapStorage)]
 pub struct PlayerStateMachine {
-    machine: StateMachine<PlayerData>,
+    pub machine: StateMachine<PlayerData>,
 }
+
+#[derive(Component, Default)]
+#[component(HashMapStorage)]
+pub struct StartPSM;

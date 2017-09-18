@@ -1,6 +1,7 @@
 use level::*;
 use std::time::Duration;
 
+#[derive(Clone)]
 pub struct DeltaTime {
     pub time: Duration,
 }
@@ -9,6 +10,7 @@ pub struct LevelTerrain {
     pub terrain: Terrain,
 }
 
+#[derive(Clone)]
 pub struct PlayerInput {
     pub up: bool,
     pub down: bool,

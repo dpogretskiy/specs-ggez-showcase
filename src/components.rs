@@ -1,9 +1,7 @@
 pub use physics::components::*;
+pub use rendering::animation_seq::*;
+pub use player::components::*;
 use specs::*;
-
-#[derive(Debug, Component)]
-#[component(HashMapStorage)]
-pub struct Player;
 
 #[derive(Debug, Component, Copy, Clone)]
 #[component(VecStorage)]
@@ -39,7 +37,7 @@ pub struct Renderable {
 #[component(NullStorage)]
 pub struct SnapCamera;
 
-#[derive(Debug, Component)]
+#[derive(Debug, Component, Clone, Copy)]
 #[component(HashMapStorage)]
 pub enum Directional {
     Left,

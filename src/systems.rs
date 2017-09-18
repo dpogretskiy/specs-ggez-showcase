@@ -6,8 +6,10 @@ use ggez::graphics::*;
 use specs::*;
 use std::collections::BTreeMap;
 use util::Vector2;
+use rendering::animation_seq::*;
 
 pub use physics::systems::*;
+pub use player::systems::*;
 
 pub struct RenderingSystem<'c> {
     ctx: &'c mut Context,
@@ -110,6 +112,28 @@ impl<'a> System<'a> for CameraSnapSystem {
 
         for p in position.join() {
             camera.move_to(Vector2::new(p.x as f64, p.y as f64));
+        }
+    }
+}
+
+
+pub struct AnimationFFSystem;
+impl <'a> System<'a> for AnimationFFSystem {
+    type SystemData = (WriteStorage<'a, HasAnimationSequence>, WriteStorage<'a, Renderable>);
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (mut anim, mut rend) = data;
+
+        for (anim, rend) in (&mut anim, &mut rend).join() {
+            match rend.tpe {
+                RenderableType::Animation { ref id, ref mut frame, ref length } => {
+                    if let Some(next) = anim.sequence.next() {
+                        *frame = next;
+                    }
+                },
+                _ => ()
+            }
+
         }
     }
 }

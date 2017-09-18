@@ -1,8 +1,9 @@
 use specs::*;
 use std::iter;
 
+#[derive(Clone)]
 pub struct HasAnimationSequence {
-    pub sequence: AnimationSequence
+    pub sequence: AnimationSequence,
 }
 
 impl Component for HasAnimationSequence {
@@ -24,6 +25,33 @@ pub enum Animation {
     Pieces { pieces: Vec<Animation> },
 }
 
+impl Animation {
+    pub fn play(start: usize, end: usize) -> Animation {
+        if start <= end {
+            Animation::Play { start, end }
+        } else {
+            Animation::ReversePlay { start, end }
+        }
+    }
+
+    pub fn repeat(times: usize, a: Animation) -> Animation {
+        Animation::Repeat {
+            times,
+            animation: Box::new(a),
+        }
+    }
+
+    pub fn forever(a: Animation) -> Animation {
+        Animation::Forever {
+            animation: Box::new(a),
+        }
+    }
+
+    pub fn seq(vec: Vec<Animation>) -> Animation {
+        Animation::Pieces { pieces: vec }
+    }
+}
+
 #[derive(Clone)]
 pub struct AnimationSequence {
     animation: Animation,
@@ -42,49 +70,41 @@ impl Iterator for AnimationSequence {
                 Animation::Play {
                     ref mut start,
                     ref end,
-                } => {
-                    if *start <= *end {
-                        *start += 1;
-                        Some(*start - 1)
-                    } else {
-                        None
-                    }
-                }
+                } => if *start <= *end {
+                    *start += 1;
+                    Some(*start - 1)
+                } else {
+                    None
+                },
                 Animation::ReversePlay {
                     ref mut start,
                     ref end,
-                } => {
-                    if *start >= *end {
-                        *start -= 1;
-                        Some(*start + 1)
-                    } else {
-                        None
-                    }
-                }
+                } => if *start >= *end {
+                    *start -= 1;
+                    Some(*start + 1)
+                } else {
+                    None
+                },
                 Animation::Repeat {
                     ref mut times,
                     ref animation,
-                } => {
-                    if *times > 0 {
-                        *times -= 1;
-                        self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
-                        next_frame(&mut self.leaf)
-                    } else {
-                        None
-                    }
-                }
+                } => if *times > 0 {
+                    *times -= 1;
+                    self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
+                    next_frame(&mut self.leaf)
+                } else {
+                    None
+                },
                 Animation::Forever { ref animation } => {
                     self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
                     next_frame(&mut self.leaf)
                 }
-                Animation::Pieces { ref mut pieces } => {
-                    if pieces.len() > 0 {
-                        self.leaf = Some(Box::new(AnimationSequence::new(pieces.remove(0))));
-                        next_frame(&mut self.leaf)
-                    } else {
-                        None
-                    }
-                }
+                Animation::Pieces { ref mut pieces } => if pieces.len() > 0 {
+                    self.leaf = Some(Box::new(AnimationSequence::new(pieces.remove(0))));
+                    next_frame(&mut self.leaf)
+                } else {
+                    None
+                },
             }
         }
     }

@@ -29,17 +29,13 @@ pub struct AnimationSequence {
     animation: Animation,
     current: Animation,
     leaf: Option<Box<AnimationSequence>>,
-    buf_next: Option<usize>,
 }
 
 impl Iterator for AnimationSequence {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.buf_next {
-            self.buf_next = None;
-            Some(next)
-        } else if let Some(frame) = next_frame(&mut self.leaf) {
+        if let Some(frame) = next_frame(&mut self.leaf) {
             Some(frame)
         } else {
             match *&mut self.current {
@@ -111,7 +107,6 @@ impl AnimationSequence {
             animation: anim.clone(),
             current: anim,
             leaf: None,
-            buf_next: None,
         }
     }
 
@@ -129,12 +124,6 @@ impl AnimationSequence {
     }
 
     pub fn is_over(&mut self) -> bool {
-        if self.buf_next.is_some() {
-            false
-        } else { 
-            let n = self.next();
-            self.buf_next = n;
-            self.buf_next.is_none()
-        }
+        self.peekable().peek().is_none()
     }
 }

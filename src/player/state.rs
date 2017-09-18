@@ -1,247 +1,234 @@
-use super::state_machine::*;
-use super::systems::PlayerSystemData;
+use player::state_machine::*;
+use player::consts as PC;
+use player::systems::PlayerAux;
+use util::seconds;
+use physics::components::*;
+use rendering::animation_seq::*;
+use systems::*;
+use components::*;
+use resources::*;
+use level::Terrain;
+
+pub type PlayerData = (MovingObject, HasAABB, HasAnimationSequence, Directional, PlayerInput, DeltaTime, Terrain);
+
 pub struct Idle;
 
-// impl State<PlayerSystemData<'a>> for Idle {
-//     fn on_start(&mut self, data: &mut PlayerSystemData<'a>) {
-//         player.data.idle.reset();
-//         player.dj.enable();
-//     }
-//     fn on_resume(&mut self, player: &mut Player) {
-//         self.on_start(player);
-//     }
-//     /// Executed on every frame before updating, for use in reacting to events.
-//     fn handle_events(&mut self, player: &mut Player) -> Trans {
-//         player.direct();
 
-//         let pi = &mut player.input;
-//         let mv = &mut player.mv;
+impl State<PlayerData> for Idle {
+    fn on_start (&mut self, data: &mut PlayerData) {
+        let &mut (_, _, anim, _, _, _, _) = data;
+        anim.sequence.reset();
+        // player.dj.enable();
+    }
 
-//         let trans = if !mv.on_ground {
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.jump {
-//             mv.velocity.y = Player::JUMP_SPEED;
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.down {
-//             if mv.on_platform {
-//                 mv.position.y -= MovingObject::PLATFORM_THRESHOLD * 2.0;
-//             };
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.left ^ pi.right {
-//             Trans::Push(Box::new(Running))
-//         } else if pi.slide {
-//             Trans::Push(Box::new(Sliding))
-//         } else if pi.attack {
-//             Trans::Push(Box::new(Attacking))
-//         } else {
-//             Trans::None
-//         };
+    fn on_resume (&mut self, data: &mut PlayerData) {
+        self.on_start(data);
+    }
+    /// Executed on every frame before updating, for use in reacting to events.
+    fn handle_events (&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, _, _, pi, _, _) = data;
 
-//         pi.reset_actions();
-//         trans
-//     }
+        let trans = if !bb.on_ground {
+            Trans::Push(Box::new(Jumping))
+        } else if pi.jump {
+            mv.velocity.y = PC::JUMP_SPEED;
+            Trans::Push(Box::new(Jumping))
+        } else if pi.down {
+            if bb.on_platform {
+                mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD * 2.0;
+            };
+            Trans::Push(Box::new(Jumping))
+        } else if pi.left ^ pi.right {
+            Trans::Push(Box::new(Running))
+        } else if pi.slide {
+            Trans::Push(Box::new(Sliding))
+        } else if pi.attack {
+            Trans::Push(Box::new(Attacking))
+        } else {
+            Trans::None
+        };
 
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         player.slow_down(true);
-//         player.mv.update_physics(duration, terrain);
-//         Trans::None
-//     }
+        pi.reset_actions();
+        trans
+    }
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
-//         player.data.idle.roll_frames();
-//         Trans::None
-//     }
+    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, _, _, _, _, _, _) = data;
+        PlayerAux::slow_down(&mut mv, true);
+        Trans::None
+    }
+}
 
-//     fn draw(&mut self, ctx: &mut Context, player: &Player, camera: &Camera) {
-//         draw_animation_frame(player, ctx, camera, &player.data.idle, &player.direction).unwrap();
-//     }
-// }
+pub struct Running;
 
-// pub struct Running;
+impl State<PlayerData> for Running {
+    fn on_start(&mut self, data: &mut PlayerData) {
+        let &mut (_, _, anim, _, pi, time, terrain) = data;
+        anim.sequence.reset();
+        // player.dj.enable();
+    }
 
-// impl State for Running {
-//     fn on_start(&mut self, player: &mut Player) {
-//         player.data.running.reset();
-//         player.dj.enable();
-//     }
-//     fn on_resume(&mut self, player: &mut Player) {
-//         self.on_start(player);
-//     }
-//     fn on_pause(&mut self, _player: &mut Player) {}
-//     fn on_stop(&mut self, _player: &mut Player) {}
+    fn on_resume(&mut self, data: &mut PlayerData) {
+        self.on_start(data);
+    }
 
-//     fn handle_events(&mut self, player: &mut Player) -> Trans {
-//         player.direct();
-//         let pi = &mut player.input;
-//         let mv = &mut player.mv;
+    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
 
-//         if !(pi.left ^ pi.right) {
-//             return Trans::Switch(Box::new(Idle));
-//         };
+        if !(pi.left ^ pi.right) {
+            return Trans::Switch(Box::new(Idle));
+        };
 
-//         let t = if !mv.on_ground {
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.jump {
-//             mv.velocity.y = Player::JUMP_SPEED;
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.down {
-//             if mv.on_platform {
-//                 mv.position.y -= MovingObject::PLATFORM_THRESHOLD * 2.0;
-//             }
-//             Trans::Push(Box::new(Jumping))
-//         } else if pi.slide {
-//             Trans::Push(Box::new(Sliding))
-//         } else if pi.attack {
-//             Trans::Push(Box::new(Attacking))
-//         } else {
-//             Trans::None
-//         };
+        let trans = if !bb.on_ground {
+            Trans::Push(Box::new(Jumping))
+        } else if pi.jump {
+            mv.velocity.y = PC::JUMP_SPEED;
+            Trans::Push(Box::new(Jumping))
+        } else if pi.down {
+            if bb.on_platform {
+                mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD * 2.0;
+            }
+            Trans::Push(Box::new(Jumping))
+        } else if pi.slide {
+            Trans::Push(Box::new(Sliding))
+        } else if pi.attack {
+            Trans::Push(Box::new(Attacking))
+        } else {
+            Trans::None
+        };
 
-//         pi.reset_actions();
-//         t
-//     }
+        pi.reset_actions();
+        trans
+    }
 
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         player.movement();
-//         player.mv.update_physics(duration, terrain);
-//         Trans::None
-//     }
+    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        PlayerAux::movement(&mut mv, &bb, &dir);
+        Trans::None
+    }
+}
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
-//         player.data.running.cycle_frames();
-//         Trans::None
-//     }
+pub struct Jumping;
 
-//     fn draw(&mut self, ctx: &mut Context, player: &Player, camera: &Camera) {
-//         draw_animation_frame(player, ctx, camera, &player.data.running, &player.direction).unwrap();
-//     }
-// }
+impl State<PlayerData> for Jumping {
+    fn on_start(&mut self, data: &mut PlayerData) {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        anim.sequence.reset();
 
-// pub struct Jumping;
+        if !bb.on_ground && bb.was_on_ground {
+            bb.frames_from_jump_start = 0;
+        }
+    }
 
-// impl State for Jumping {
-//     fn on_start(&mut self, player: &mut Player) {
-//         player.data.jumping.reset();
+    fn on_resume(&mut self, data: &mut PlayerData) {
+        self.on_start(data)
+    }
 
-//         if !player.mv.on_ground && player.mv.was_on_ground {
-//             player.mv.frames_from_jump_start = 0;
-//         }
-//     }
+    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
 
-//     fn on_resume(&mut self, player: &mut Player) {
-//         self.on_start(player)
-//     }
+        if bb.cannot_go_left_frames > 0 {
+            bb.cannot_go_left_frames -= 1;
+            pi.left = false;
+        };
 
-//     fn handle_events(&mut self, player: &mut Player) -> Trans {
-//         player.direct();
+        if bb.cannot_go_right_frames > 0 {
+            bb.cannot_go_right_frames -= 1;
+            pi.right = false;
+        };
 
-//         if player.mv.cannot_go_left_frames > 0 {
-//             player.mv.cannot_go_left_frames -= 1;
-//             player.input.left = false;
-//         };
+        if pi.left ^ pi.right {
+            PlayerAux::movement(&mut mv, &bb, &dir);
+        };
 
-//         if player.mv.cannot_go_right_frames > 0 {
-//             player.mv.cannot_go_right_frames -= 1;
-//             player.input.right = false;
-//         };
+        let trans = if pi.attack {
+            Trans::Switch(Box::new(Attacking))
+        } else if pi.jump {
+            if bb.frames_from_jump_start <= PC::JUMP_FRAMES_THRESHOLD &&
+                mv.velocity.y <= 0.0 && !bb.at_ceiling
+            {
+                mv.velocity.y = PC::JUMP_SPEED;
+                Trans::None
+            } else {
+                // player.dj.double_jump(&mut mv);
+                Trans::None
+            }
+        } else {
+            Trans::None
+        };
 
-//         if player.input.left ^ player.input.right {
-//             player.movement();
-//         };
+        pi.reset_actions();
+        trans
+    }
 
-//         let t = if player.input.attack {
-//             Trans::Switch(Box::new(Attacking))
-//         } else if player.input.jump {
-//             if player.mv.frames_from_jump_start <= Player::JUMP_FRAMES_THRESHOLD &&
-//                 player.mv.velocity.y <= 0.0 && !player.mv.at_ceiling
-//             {
-//                 player.mv.velocity.y = Player::JUMP_SPEED;
-//                 Trans::None
-//             } else {
-//                 player.dj.double_jump(&mut player.mv);
-//                 Trans::None
-//             }
-//         } else {
-//             Trans::None
-//         };
+    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
 
-//         player.input.reset_actions();
-//         t
-//     }
+        let y_vel = PC::GRAVITY * seconds(&time.time) + mv.velocity.y;
+        mv.velocity.y = y_vel.max(PC::MAX_FALLING_SPEED);
+        // let gl = player.lg.grab_ledge(&mut mv, &pi, terrain);
 
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         let y_vel = Player::GRAVITY * seconds(&duration) + player.mv.velocity.y;
-//         player.mv.velocity.y = y_vel.max(Player::MAX_FALLING_SPEED);
-//         player.mv.update_physics(duration, terrain);
-//         let gl = player.lg.grab_ledge(&mut player.mv, &player.input, terrain);
+        if bb.on_ground {
+            Trans::Pop
+        } else /*if gl {
+            Trans::Switch(Box::new(LedgeGrab))
+        } else*/if !(pi.left ^ pi.right) {
+            PlayerAux::slow_down(&mut mv, false);
+            Trans::None
+        } else {
+            Trans::None
+        }
+    }
 
-//         if player.mv.on_ground {
-//             Trans::Pop
-//         } else if gl {
-//             Trans::Switch(Box::new(LedgeGrab))
-//         } else if !(player.input.left ^ player.input.right) {
-//             player.slow_down(false);
-//             Trans::None
-//         } else {
-//             Trans::None
-//         }
-//     }
+    fn fixed_update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
-//         player.data.jumping.roll_frames();
-//         if player.mv.frames_from_jump_start <= Player::JUMP_FRAMES_THRESHOLD {
-//             if player.mv.at_ceiling || player.mv.velocity.y > 0.0 {
-//                 player.mv.frames_from_jump_start = Player::JUMP_FRAMES_THRESHOLD + 1;
-//             }
-//         }
+        if bb.frames_from_jump_start <= PC::JUMP_FRAMES_THRESHOLD {
+            if bb.at_ceiling || mv.velocity.y > 0.0 {
+                bb.frames_from_jump_start = PC::JUMP_FRAMES_THRESHOLD + 1;
+            }
+        }
 
-//         player.mv.frames_from_jump_start += 1;
-//         Trans::None
-//     }
+        bb.frames_from_jump_start += 1;
+        Trans::None
+    }
+}
 
-//     fn draw(&mut self, ctx: &mut Context, player: &Player, camera: &Camera) {
-//         draw_animation_frame(player, ctx, camera, &player.data.jumping, &player.direction).unwrap();
-//     }
-// }
+pub struct Sliding;
 
-// pub struct Sliding;
+impl State<PlayerData> for Sliding {
+    fn on_start(&mut self,  data: &mut PlayerData) {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        anim.sequence.reset();
+    }
 
-// impl State for Sliding {
-//     fn on_start(&mut self, player: &mut Player) {
-//         player.data.sliding.reset();
-//     }
+    fn handle_events(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        let trans = if pi.jump {
+            Trans::Switch(Box::new(Jumping))
+        } else {
+            Trans::None
+        };
 
-//     fn handle_events(&mut self, player: &mut Player) -> Trans {
-//         let t = if player.input.jump {
-//             Trans::Switch(Box::new(Jumping))
-//         } else {
-//             Trans::None
-//         };
+        pi.reset_actions();
+        trans
+    }
 
-//         player.input.reset_actions();
-//         t
-//     }
+    fn update(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        Trans::None
+    }
 
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         player.mv.update_physics(duration, terrain);
-//         Trans::None
-//     }
+    fn fixed_update(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        if anim.sequence.is_over() {
+            Trans::Pop
+        } else {
+            Trans::None
+        }
+    }
+}
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
-//         if player.data.sliding.is_over() {
-//             Trans::Pop
-//         } else {
-//             player.data.sliding.next_frame();
-//             Trans::None
-//         }
-//     }
-
-//     fn draw(&mut self, ctx: &mut Context, player: &Player, camera: &Camera) {
-//         draw_animation_frame(player, ctx, camera, &player.data.sliding, &player.direction).unwrap();
-//     }
-// }
-
-// pub struct Attacking;
+pub struct Attacking;
 
 // impl Attacking {
 //     fn can_cancel(&self, player: &Player) -> bool {
@@ -249,100 +236,90 @@ pub struct Idle;
 //     }
 // }
 
-// impl State for Attacking {
-//     fn on_start(&mut self, player: &mut Player) {
-//         player.data.attacking.reset();
-//     }
+impl State<PlayerData> for Attacking {
+    fn on_start(&mut self,  data: &mut PlayerData) {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        anim.sequence.reset();
+    }
 
-//     fn handle_events(&mut self, player: &mut Player) -> Trans {
-//         player.direct();
+    fn handle_events(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        // let t = if self.can_cancel(player) {
+        //     if pi.jump {
+        //         Trans::Switch(Box::new(Jumping))
+        //     } else if pi.slide {
+        //         Trans::Switch(Box::new(Sliding))
+        //     } else if pi.attack {
+        //         Trans::Switch(Box::new(Attacking))
+        //     } else {
+        //         Trans::None
+        //     }
+        // } else {
+        //     Trans::None
+        // };
 
-//         let t = if self.can_cancel(player) {
-//             if player.input.jump {
-//                 Trans::Switch(Box::new(Jumping))
-//             } else if player.input.slide {
-//                 Trans::Switch(Box::new(Sliding))
-//             } else if player.input.attack {
-//                 Trans::Switch(Box::new(Attacking))
-//             } else {
-//                 Trans::None
-//             }
-//         } else {
-//             Trans::None
-//         };
+        pi.reset_actions();
+        Trans::None
+    }
 
-//         player.input.reset_actions();
-//         t
-//     }
+    fn fixed_update(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        if anim.sequence.is_over() {
+            Trans::Pop
+        } else {
+            Trans::None
+        }
+    }
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
-//         if player.data.attacking.is_over() {
-//             Trans::Pop
-//         } else {
-//             player.data.attacking.next_frame();
-//             Trans::None
-//         }
-//     }
-
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         player.mv.update_physics(duration, terrain);
-//         Trans::None
-//     }
-
-//     fn draw(&mut self, ctx: &mut Context, player: &Player, camera: &Camera) {
-//         draw_animation_frame(
-//             player,
-//             ctx,
-//             &camera,
-//             &player.data.attacking,
-//             &player.direction,
-//         ).unwrap();
-//     }
-// }
+    fn update(&mut self,  data: &mut PlayerData) -> Trans<PlayerData> {
+        let &mut (mv, bb, anim, dir, pi, time, terrain) = data;
+        Trans::None
+    }
+}
 
 // pub struct LedgeGrab;
 
 // impl State for LedgeGrab {
-//     fn on_start(&mut self, player: &mut Player) {
+//     fn on_start(&mut self,  data: &mut PlayerData) {
 //         player.data.idle.reset();
 //         player.dj.enable();
 //     }
-//     fn on_resume(&mut self, player: &mut Player) {
+//     fn on_resume(&mut self,  data: &mut PlayerData) {
 //         self.on_start(player);
 //     }
 //     /// Executed on every frame before updating, for use in reacting to events.
-//     fn handle_events(&mut self, _player: &mut Player) -> Trans {
+//     fn handle_events(&mut self, _ data: &mut PlayerData) -> Trans {
 //         Trans::None
 //     }
 
-//     fn update(&mut self, player: &mut Player, duration: &Duration, terrain: &Terrain) -> Trans {
-//         player.mv.update_physics(duration, terrain);
+//     fn update(&mut self,  data: &mut PlayerData, duration: &Duration, terrain: &Terrain) -> Trans {
+//         mv.update_physics(duration, terrain);
 
 //         let ledge_on_left =
-//             player.lg.ledge_tile.0 as f64 * terrain.tile_size < player.mv.position.x;
+//             player.lg.ledge_tile.0 as f64 * terrain.tile_size < mv.position.x;
 //         let ledge_on_right = !ledge_on_left;
 
-//         let state = if player.input.down || (player.input.right && ledge_on_left) ||
-//             (player.input.left && ledge_on_right)
+//         let state = if pi.down || (pi.right && ledge_on_left) ||
+//             (pi.left && ledge_on_right)
 //         {
 //             if ledge_on_left {
-//                 player.mv.cannot_go_left_frames = 3;
+//                 mv.cannot_go_left_frames = 3;
 //             } else {
-//                 player.mv.cannot_go_right_frames = 3;
+//                 mv.cannot_go_right_frames = 3;
 //             };
 //             Trans::Switch(Box::new(Jumping))
-//         } else if player.input.jump {
-//             player.mv.velocity.y = Player::JUMP_SPEED;
+//         } else if pi.jump {
+//             mv.velocity.y = Player::JUMP_SPEED;
 //             Trans::Switch(Box::new(Jumping))
 //         } else {
 //             Trans::None
 //         };
 
-//         player.input.reset_actions();
+//         pi.reset_actions();
 //         state
 //     }
 
-//     fn fixed_update(&mut self, player: &mut Player) -> Trans {
+//     fn fixed_update(&mut self,  data: &mut PlayerData) -> Trans {
 //         player.data.idle.roll_frames();
 //         Trans::None
 //     }

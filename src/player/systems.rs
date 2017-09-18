@@ -2,15 +2,14 @@ use components::*;
 use player::components::*;
 use player::consts as PC;
 use resources::*;
+use rendering::animation_seq::*;
 use specs::*;
 
 pub struct PlayerDirectionSystem;
 impl<'a> System<'a> for PlayerDirectionSystem {
-    type SystemData = (
-        WriteStorage<'a, Directional>,
-        ReadStorage<'a, Controlled>,
-        Fetch<'a, PlayerInput>,
-    );
+    type SystemData = (WriteStorage<'a, Directional>,
+     ReadStorage<'a, Controlled>,
+     Fetch<'a, PlayerInput>);
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
         for (mut dir, _) in (&mut directional, &controlled).join() {
@@ -25,31 +24,26 @@ impl<'a> System<'a> for PlayerDirectionSystem {
     }
 }
 
-pub type PlayerSystemData<'a> = (
-    Entities<'a>,
-    ReadStorage<'a, Controlled>,
-    WriteStorage<'a, MovingObject>,
-    WriteStorage<'a, HasAABB>,
-    FetchMut<'a, PlayerInput>,
-    WriteStorage<'a, Renderable>,
-);
-
-struct PlayerAux;
+pub struct PlayerAux;
 impl PlayerAux {
     pub fn movement(mv: &mut MovingObject, bb: &HasAABB, direction: &Directional) {
         match *direction {
-            Directional::Left => if bb.pushes_left_wall {
-                PlayerAux::stop(mv);
-            } else {
-                mv.accel.x = -PC::WALK_ACCEL;
-                mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
-            },
-            Directional::Right => if bb.pushes_right_wall {
-                PlayerAux::stop(mv);
-            } else {
-                mv.accel.x = PC::WALK_ACCEL;
-                mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
-            },
+            Directional::Left => {
+                if bb.pushes_left_wall {
+                    PlayerAux::stop(mv);
+                } else {
+                    mv.accel.x = -PC::WALK_ACCEL;
+                    mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
+                }
+            }
+            Directional::Right => {
+                if bb.pushes_right_wall {
+                    PlayerAux::stop(mv);
+                } else {
+                    mv.accel.x = PC::WALK_ACCEL;
+                    mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
+                }
+            }
         }
     }
 

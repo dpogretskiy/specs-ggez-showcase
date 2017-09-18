@@ -23,7 +23,7 @@ pub use rendering::asset_storage;
 pub use rendering::camera;
 
 use game::*;
-use ggez::{conf, event, graphics, Context};
+use ggez::{Context, conf, event, graphics};
 
 fn main() {
     let c = conf::Conf {
@@ -40,39 +40,4 @@ fn main() {
     let mut state = Game::new(ctx).unwrap();
 
     event::run(ctx, &mut state).unwrap();
-}
-
-
-
-
-//jerk off
-type Lifetimed<'a> = &'a usize;
-
-struct LTStruct<T> {
-    no_lifetime: usize,
-    _marker: std::marker::PhantomData<T>,
-}
-
-impl<T> LTStruct<T> {
-    pub fn new(x: usize) -> LTStruct<T> {
-        use std::marker::PhantomData;
-
-        LTStruct {
-            no_lifetime: x,
-            _marker: PhantomData,
-        }
-    }
-
-    pub fn xxxx(&self, x: T) -> T {
-        x
-    }
-}
-
-struct So {
-    pub s: LTStruct<Lifetimed<_>>,
-}
-
-fn nailed_it<'a>(s: So) -> Lifetimed<'a> {
-    let us = 15;
-    s.s.xxxx(&us)
 }

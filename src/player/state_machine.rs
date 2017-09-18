@@ -20,44 +20,31 @@ pub trait State<T> {
     fn on_resume(&mut self, _data: &mut T) {}
 
     /// Executed on every frame before updating, for use in reacting to events.
-    fn handle_events(&mut self, _data: &mut T) -> Trans<T> {
+    fn handle_events (&mut self, _data: &mut T) -> Trans<T> {
         Trans::None
     }
 
     /// Executed repeatedly at stable, predictable intervals (1/60th of a second
     /// by default).
-    fn fixed_update(&mut self, _data: &mut T) -> Trans<T> {
+    fn fixed_update (&mut self, _data: &mut T) -> Trans<T> {
         Trans::None
     }
 
     /// Executed on every frame immediately, as fast as the engine will allow.
-    fn update(&mut self, _data: &mut T) -> Trans<T> {
+    fn update (&mut self, _data: &mut T) -> Trans<T> {
         Trans::None
     }
 }
 
-pub struct StateMachine<T>
-where
-    T: Send + Sync, {
+unsafe impl<T> Sync for StateMachine<T> {}
+unsafe impl<T> Send for StateMachine<T> {}
+
+pub struct StateMachine<T> {
     running: bool,
     state_stack: Vec<Box<State<T>>>,
 }
 
-unsafe impl<T> Sync for StateMachine<T>
-where
-    T: Send + Sync,
-{
-}
-
-unsafe impl<T> Send for StateMachine<T>
-where
-    T: Send + Sync,
-{
-}
-
-impl<T> StateMachine<T>
-where
-    T: Send + Sync, {
+impl<T> StateMachine<T> {
     pub fn new<S>(initial_state: S) -> StateMachine<T>
     where
         S: State<T> + 'static, {
@@ -71,7 +58,7 @@ where
         self.running
     }
 
-    pub fn start(&mut self, data: &mut T) {
+    pub fn start (&mut self, data: &mut T) {
         if !self.running {
             let state = self.state_stack.last_mut().unwrap();
             state.on_start(data);
@@ -79,7 +66,7 @@ where
         }
     }
 
-    pub fn handle_events(&mut self, data: &mut T) {
+    pub fn handle_events (&mut self, data: &mut T) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
                 Some(state) => state.handle_events(data),
@@ -90,7 +77,7 @@ where
         }
     }
 
-    pub fn fixed_update(&mut self, data: &mut T) {
+    pub fn fixed_update (&mut self, data: &mut T) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
                 Some(state) => state.fixed_update(data),
@@ -101,7 +88,7 @@ where
         }
     }
 
-    pub fn update(&mut self, data: &mut T) {
+    pub fn update (&mut self, data: &mut T) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
                 Some(state) => state.update(data),
@@ -112,7 +99,7 @@ where
         }
     }
 
-    fn transition(&mut self, request: Trans<T>, data: &mut T) {
+    fn transition (&mut self, request: Trans<T>, data: &mut T) {
         if self.running {
             match request {
                 Trans::None => (),
@@ -124,7 +111,7 @@ where
         }
     }
 
-    fn switch(&mut self, state: Box<State<T>>, data: &mut T) {
+    fn switch (&mut self, state: Box<State<T>>, data: &mut T) {
         if self.running {
             if let Some(mut state) = self.state_stack.pop() {
                 state.on_stop(data)
@@ -136,7 +123,7 @@ where
         }
     }
 
-    fn push(&mut self, state: Box<State<T>>, data: &mut T) {
+    fn push (&mut self, state: Box<State<T>>, data: &mut T) {
         if self.running {
             if let Some(state) = self.state_stack.last_mut() {
                 state.on_pause(data);
@@ -148,7 +135,7 @@ where
         }
     }
 
-    fn pop(&mut self, data: &mut T) {
+    fn pop (&mut self, data: &mut T) {
         if self.running {
             if let Some(mut state) = self.state_stack.pop() {
                 state.on_stop(data);
@@ -162,7 +149,7 @@ where
         }
     }
 
-    fn stop(&mut self, data: &mut T) {
+    fn stop (&mut self, data: &mut T) {
         if self.running {
             while let Some(mut state) = self.state_stack.pop() {
                 state.on_stop(data);

@@ -10,10 +10,9 @@ use resources::*;
 use specs::*;
 use std::time::Duration;
 use systems::*;
-use player;
 
-use player::animation_defs::PlayerAnimations;
 use physics::AABB;
+use player::animation_defs::PlayerAnimations;
 
 
 use util::Vector2;
@@ -38,7 +37,8 @@ impl<'a, 'b> Game<'a, 'b> {
         world.register::<Controlled>();
         world.register::<SnapCamera>();
         world.register::<StartPSM>();
-        
+        world.register::<ChaseCamera>();
+
         //load everything!
         {
             let mut asset_storage = AssetStorage::empty();
@@ -78,32 +78,13 @@ impl<'a, 'b> Game<'a, 'b> {
             .with(Position::new(0.0, 0.0))
             .with(Renderable {
                 layer: 0,
-                tpe: RenderableType::Image {
-                    id: "level-background",
-                },
+                tpe: RenderableType::Image { id: "level-background" },
             })
             .with(Scalable::new(2.0, 2.0))
+            .with(ChaseCamera)
             .build();
 
-        let mut psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
-
-        world.create_entity()
-            .with(Position::new(0.0, 0.0))
-            .with(Renderable{ layer: 5, tpe: RenderableType::Animation { id: "player-idle", frame: 0, length: 10 }})
-            .with(HasAnimationSequence { sequence: PlayerAnimations::idle() })
-            .with(Controlled)
-            .with(psm)
-            .with(StartPSM)
-            .with(SnapCamera)
-            .with(Directional::Right)
-            .with(Scalable::new(0.4, 0.4))
-            .with(MovingObject::new(Vector2::new(300.0, 500.0)))
-            .with(HasAABB::new(AABB::new_full(Vector2::new(300.0, 500.0), Vector2::new(290.0, 500.0), Vector2::new(0.4, 0.4))))
-            .build();
-
-        world.add_resource(DeltaTime {
-            time: Duration::from_secs(0),
-        });
+        world.add_resource(DeltaTime { time: Duration::from_secs(0) });
         world.add_resource(PlayerInput::new());
 
         let (w, h) = (ctx.conf.window_width, ctx.conf.window_height);
@@ -111,23 +92,31 @@ impl<'a, 'b> Game<'a, 'b> {
         let fov = w as f64 * 1.5;
         world.add_resource(Camera::new(w, h, fov, hc * fov));
 
+        create_player(&mut world, true, Vector2::new(500.0, 500.0));
+
         let dispatcher: Dispatcher<'a, 'b> = DispatcherBuilder::new()
             .add(StartPSMSystem, "start-state-machines", &[])
-            .add(PlayerDirectionSystem, "player.direct", &[])
+            .add(PlayerDirectionSystem, "p.direct", &[])
             .add(
                 PlayerHandleEventsSystem,
-                "player_sm.handle_events",
-                &["player.direct"],
+                "p.handle_events",
+                &["p.direct"],
             )
+            .add(MovingSystem, "moving", &[])
+            .add(HasAABBSystem, "has_aabb", &["moving"])
             .add(
                 PlayerUpdateSystem,
-                "player_sm.update",
-                &["player_sm.handle_events"],
+                "p.update",
+                &["p.handle_events"],
             )
-            .add(MovingSystem, "moving", &["player_sm.update"])
-            .add(HasAABBSystem, "has_aabb", &["moving"])
             .add(PositionSystem, "position", &["moving", "has_aabb"])
+            .add(
+                ResetInputSystem,
+                "p.reset_input",
+                &["p.handle_events"],
+            )
             .add(CameraSnapSystem, "camera_snap", &["position"])
+            .add(ChaseCameraSystem, "chase_camera", &["position"])
             .build();
 
         Ok(Game { world, dispatcher })
@@ -136,9 +125,15 @@ impl<'a, 'b> Game<'a, 'b> {
 
 impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
-        if timer::get_ticks(ctx) % 1000 == 0 {
+        use cpuprofiler::PROFILER;
+
+        if timer::get_ticks(ctx) % 100 == 0 {
             println!("FPS: {}", timer::get_fps(ctx));
         }
+
+        PROFILER.lock().unwrap().start("special.profile").expect("Some");
+
+        self.world.write_resource::<DeltaTime>().time = dt;
 
         if timer::check_update_time(ctx, 30) {
             PlayerFixedUpdateSystem.run_now(&mut self.world.res);
@@ -147,6 +142,8 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
 
         self.dispatcher.dispatch(&mut self.world.res);
         self.world.maintain();
+
+        PROFILER.lock().unwrap().stop().expect("Some");
 
         Ok(())
     }
@@ -221,18 +218,23 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
                     input.left = false
                 }
             }
-            Axis::LeftY => if value > 7500 {
-                input.down = true
-            } else {
-                input.down = false
-            },
+            Axis::LeftY => {
+                if value > 7500 {
+                    input.down = true
+                } else {
+                    input.down = false
+                }
+            }
             _ => (),
         }
     }
 
     fn mouse_button_down_event(&mut self, button: event::MouseButton, x: i32, y: i32) {
         if button == event::MouseButton::Left {
-            // let p = self.camera.screen_to_world_coords((x, y));
+            let p = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
+            create_player(&mut self.world, false, p);
+
+
             // let rect = graphics::Rect::new(0.0, 0.41133004, 0.25728154, 0.26108375);
             // let rect = graphics::Rect::new(0.0, 0.0, 1.0, 1.0);
 
@@ -242,5 +244,44 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
             //     rect,
             // ));
         }
+    }
+}
+
+
+fn create_player(world: &mut World, snap_camera: bool, location: Vector2) {
+    let psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
+
+    let pos = Position::new(location.x as f32, location.y as f32);
+    let player_scale: f64 = 0.4;
+    let scalable = Scalable::new(player_scale as f32, player_scale as f32);
+
+    let e = world
+        .create_entity()
+        .with(pos)
+        .with(Renderable {
+            layer: 5,
+            tpe: RenderableType::Animation {
+                id: "player-idle",
+                frame: 0,
+                length: 10,
+            },
+        })
+        .with(HasAnimationSequence { sequence: PlayerAnimations::idle() })
+        .with(Controlled)
+        .with(psm)
+        .with(StartPSM)
+        .with(Directional::Right)
+        .with(scalable)
+        .with(MovingObject::new(location))
+        .with(HasAABB::new(AABB::new_full(
+            Vector2::new(500.0, 500.0),
+            Vector2::new(290.0, 500.0) * player_scale,
+            Vector2::new(0.7, 0.8),
+        )));
+
+    if snap_camera {
+        e.with(SnapCamera).build();
+    } else {
+        e.build();
     }
 }

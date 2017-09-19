@@ -12,6 +12,8 @@ specs = "*"
 specs-derive = "*"
 rayon = "0.7.1"
 
+cpuprofiler = "*"
+
 [dependencies.tilesheet-marker]
 path = "../spritesheet-marker"
 version = "0.0.1"
@@ -19,6 +21,9 @@ version = "0.0.1"
 [dependencies.ggez]
 git = "https://github.com/ggez/ggez.git"
 features = ["cargo-resource-root"]
+
+[profile.release]
+codegen-units = 1
 
 [features]
 cargo-resource-root = []

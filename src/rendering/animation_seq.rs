@@ -10,9 +10,6 @@ impl Component for HasAnimationSequence {
     type Storage = HashMapStorage<HasAnimationSequence>;
 }
 
-// unsafe impl Send for AnimationSequence {}
-// unsafe impl Sync for AnimationSequence {}
-
 #[derive(Clone)]
 pub enum Animation {
     Play { start: usize, end: usize },
@@ -42,9 +39,7 @@ impl Animation {
     }
 
     pub fn forever(a: Animation) -> Animation {
-        Animation::Forever {
-            animation: Box::new(a),
-        }
+        Animation::Forever { animation: Box::new(a) }
     }
 
     pub fn seq(vec: Vec<Animation>) -> Animation {
@@ -54,7 +49,7 @@ impl Animation {
 
 #[derive(Clone)]
 pub struct AnimationSequence {
-    animation: Animation,
+    pub animation: Animation,
     current: Animation,
     leaf: Option<Box<AnimationSequence>>,
 }
@@ -70,41 +65,49 @@ impl Iterator for AnimationSequence {
                 Animation::Play {
                     ref mut start,
                     ref end,
-                } => if *start <= *end {
-                    *start += 1;
-                    Some(*start - 1)
-                } else {
-                    None
-                },
+                } => {
+                    if *start <= *end {
+                        *start += 1;
+                        Some(*start - 1)
+                    } else {
+                        None
+                    }
+                }
                 Animation::ReversePlay {
                     ref mut start,
                     ref end,
-                } => if *start >= *end {
-                    *start -= 1;
-                    Some(*start + 1)
-                } else {
-                    None
-                },
+                } => {
+                    if *start >= *end {
+                        *start -= 1;
+                        Some(*start + 1)
+                    } else {
+                        None
+                    }
+                }
                 Animation::Repeat {
                     ref mut times,
                     ref animation,
-                } => if *times > 0 {
-                    *times -= 1;
-                    self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
-                    next_frame(&mut self.leaf)
-                } else {
-                    None
-                },
+                } => {
+                    if *times > 0 {
+                        *times -= 1;
+                        self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
+                        next_frame(&mut self.leaf)
+                    } else {
+                        None
+                    }
+                }
                 Animation::Forever { ref animation } => {
                     self.leaf = Some(Box::new(AnimationSequence::new(*animation.clone())));
                     next_frame(&mut self.leaf)
                 }
-                Animation::Pieces { ref mut pieces } => if pieces.len() > 0 {
-                    self.leaf = Some(Box::new(AnimationSequence::new(pieces.remove(0))));
-                    next_frame(&mut self.leaf)
-                } else {
-                    None
-                },
+                Animation::Pieces { ref mut pieces } => {
+                    if pieces.len() > 0 {
+                        self.leaf = Some(Box::new(AnimationSequence::new(pieces.remove(0))));
+                        next_frame(&mut self.leaf)
+                    } else {
+                        None
+                    }
+                }
             }
         }
     }

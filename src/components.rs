@@ -1,7 +1,9 @@
 pub use physics::components::*;
-pub use rendering::animation_seq::*;
 pub use player::components::*;
+pub use player::components::*;
+pub use rendering::animation_seq::*;
 use specs::*;
+
 
 #[derive(Debug, Component, Copy, Clone)]
 #[component(VecStorage)]
@@ -26,6 +28,22 @@ pub enum RenderableType {
     Batch { id: &'static str },
 }
 
+impl RenderableType {
+    pub fn set_animation_id(&mut self, new_id: &'static str, new_length: usize) {
+        match self {
+            &mut RenderableType::Animation {
+                ref mut id,
+                ref frame,
+                ref mut length,
+            } => {
+                *id = new_id;
+                *length = new_length;
+            }
+            _ => (),
+        }
+    }
+}
+
 #[derive(Debug, Component)]
 #[component(VecStorage)]
 pub struct Renderable {
@@ -33,19 +51,27 @@ pub struct Renderable {
     pub tpe: RenderableType,
 }
 
+#[derive(Debug, Component)]
+#[component(DenseVecStorage)]
+pub struct Controlled;
+
 #[derive(Debug, Component, Default)]
 #[component(NullStorage)]
 pub struct SnapCamera;
 
+#[derive(Debug, Component, Default)]
+#[component(NullStorage)]
+pub struct ChaseCamera;
+
 #[derive(Debug, Component, Clone, Copy)]
-#[component(HashMapStorage)]
+#[component(VecStorage)]
 pub enum Directional {
     Left,
     Right,
 }
 
 #[derive(Debug, Component, Clone, Copy)]
-#[component(HashMapStorage)]
+#[component(DenseVecStorage)]
 pub struct Scalable {
     pub x: f32,
     pub y: f32,

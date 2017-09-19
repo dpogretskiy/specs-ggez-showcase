@@ -4,8 +4,8 @@ use specs::*;
 use std::cmp;
 use util::*;
 
-#[derive(Debug, Clone, Component)]
-#[component(HashMapStorage)]
+#[derive(Debug, Component)]
+#[component(DenseVecStorage)]
 pub struct MovingObject {
     pub old_position: Vector2,
     pub position: Vector2,
@@ -17,8 +17,8 @@ pub struct MovingObject {
     pub velocity: Vector2,
 }
 
-#[derive(Debug, Clone, Component)]
-#[component(HashMapStorage)]
+#[derive(Debug, Component)]
+#[component(DenseVecStorage)]
 pub struct HasAABB {
     pub aabb: AABB,
 

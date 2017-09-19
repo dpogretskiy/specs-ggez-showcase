@@ -8,6 +8,8 @@ extern crate specs;
 #[macro_use]
 extern crate specs_derive;
 
+extern crate cpuprofiler;
+
 mod sprite;
 mod components;
 mod systems;
@@ -25,6 +27,8 @@ pub use rendering::camera;
 use game::*;
 use ggez::{Context, conf, event, graphics};
 
+// use cpuprofiler::PROFILER;
+
 fn main() {
     let c = conf::Conf {
         window_width: 1600,
@@ -35,7 +39,6 @@ fn main() {
     };
     let ctx = &mut Context::load_from_conf("config", "me", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
-    println!("{:?}", graphics::get_renderer_info(ctx).unwrap());
 
     let mut state = Game::new(ctx).unwrap();
 

@@ -8,4 +8,4 @@ SDL2.dll
 /gnu-mingw/
 /msvc/
 rls*.log
-.profile
+*.profile

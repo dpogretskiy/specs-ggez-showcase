@@ -1,55 +1,64 @@
-use components::Directional;
-use physics::components::*;
+use components::*;
+use player;
 use player::animation_defs::*;
 use player::consts as PC;
 use player::state_machine::*;
 use player::systems::PlayerAux;
 use rendering::animation_seq::*;
 use resources::*;
-use std::cell::RefCell;
 use util::seconds;
-
-pub type PlayerData = (
-    RefCell<MovingObject>,
-    RefCell<HasAABB>,
-    RefCell<HasAnimationSequence>,
-    Directional,
-    PlayerInput,
-    DeltaTime,
-);
 
 pub struct Idle;
 
-impl State<PlayerData> for Idle {
-    fn on_start(&mut self, data: &mut PlayerData) {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        anim.borrow_mut().sequence = PlayerAnimations::idle();
-        println!("Idle now!");
+impl State for Idle {
+    fn on_start(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        anim.sequence = PlayerAnimations::idle();
+        rend.tpe.set_animation_id(player::P_IDLE, 10);
         // player.dj.enable();
     }
 
-    fn on_resume(&mut self, data: &mut PlayerData) {
-        self.on_start(data);
+    fn on_resume(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        self.on_start(mv, bb, anim, rend, dir, pi, delta);
     }
     /// Executed on every frame before updating, for use in reacting to events.
-    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, ref anim, _, ref pi, _) = data;
-        let mut mv = mv.borrow_mut();
-        let mut bb = bb.borrow_mut();
-
+    fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         let trans = if !bb.on_ground {
-            anim.borrow_mut().sequence = PlayerAnimations::drop();
+            anim.sequence = PlayerAnimations::drop();
             Trans::Push(Box::new(Jumping))
         } else if pi.jump {
             mv.velocity.y = PC::JUMP_SPEED;
-            anim.borrow_mut().sequence = PlayerAnimations::jump();
+            anim.sequence = PlayerAnimations::jump();
             Trans::Push(Box::new(Jumping))
-        } else if pi.down {
-            if bb.on_platform {
-                mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD * 2.0;
-            };
-            anim.borrow_mut().sequence = PlayerAnimations::drop();
-            Trans::Push(Box::new(Jumping))
+        } else if pi.down && bb.on_platform {
+            mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD;
+            Trans::None
         } else if pi.left ^ pi.right {
             Trans::Push(Box::new(Running))
         } else if pi.slide {
@@ -62,49 +71,76 @@ impl State<PlayerData> for Idle {
         trans
     }
 
-    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, _, _, _, _, _) = data;
-        PlayerAux::slow_down(&mut *mv.borrow_mut(), true);
+    fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
+        PlayerAux::slow_down(&mut *mv, true);
         Trans::None
     }
 }
 
 pub struct Running;
 
-impl State<PlayerData> for Running {
-    fn on_start(&mut self, data: &mut PlayerData) {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        anim.borrow_mut().sequence = PlayerAnimations::run();
-        println!("Running now!");
+impl State for Running {
+    fn on_start(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        anim.sequence = PlayerAnimations::run();
+        rend.tpe.set_animation_id(player::P_RUN, 10);
         // player.dj.enable();
     }
 
-    fn on_resume(&mut self, data: &mut PlayerData) {
-        self.on_start(data);
+    fn on_resume(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        self.on_start(mv, bb, anim, rend, dir, pi, delta);
     }
 
-    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, ref anim, _, ref pi, _) = data;
-        let mut mv = mv.borrow_mut();
-        let mut bb = bb.borrow_mut();
-
+    fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         if !(pi.left ^ pi.right) {
             return Trans::Switch(Box::new(Idle));
         };
 
         let trans = if !bb.on_ground {
-            anim.borrow_mut().sequence = PlayerAnimations::drop();
+            anim.sequence = PlayerAnimations::drop();
             Trans::Push(Box::new(Jumping))
         } else if pi.jump {
             mv.velocity.y = PC::JUMP_SPEED;
-            anim.borrow_mut().sequence = PlayerAnimations::jump();
+            anim.sequence = PlayerAnimations::jump();
             Trans::Push(Box::new(Jumping))
-        } else if pi.down {
-            if bb.on_platform {
-                mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD * 2.0;
-            }
-            anim.borrow_mut().sequence = PlayerAnimations::drop();
-            Trans::Push(Box::new(Jumping))
+        } else if pi.down && bb.on_platform {
+            mv.position.y -= HumanoidMovement::PLATFORM_THRESHOLD * 2.0;
+            Trans::None
         } else if pi.slide {
             Trans::Push(Box::new(Sliding))
         } else if pi.attack {
@@ -116,11 +152,16 @@ impl State<PlayerData> for Running {
         trans
     }
 
-    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, _, ref dir, _, _) = data;
-        let mut mv = mv.borrow_mut();
-        let mut bb = bb.borrow_mut();
-
+    fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         PlayerAux::movement(&mut *mv, &mut *bb, &dir);
         Trans::None
     }
@@ -128,26 +169,46 @@ impl State<PlayerData> for Running {
 
 pub struct Jumping;
 
-impl State<PlayerData> for Jumping {
-    fn on_start(&mut self, data: &mut PlayerData) {
-        let &mut (_, ref bb, ref anim, _, _, _) = data;
-        let mut bb = bb.borrow_mut();
-
+impl State for Jumping {
+    fn on_start(
+        &mut self,
+        _mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) {
+        rend.tpe.set_animation_id(player::P_JUMP, 10);
         if !bb.on_ground && bb.was_on_ground {
             bb.frames_from_jump_start = 0;
         }
-        println!("Jumping now");
     }
 
-    fn on_resume(&mut self, data: &mut PlayerData) {
-        self.on_start(data)
+    fn on_resume(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        self.on_start(mv, bb, anim, rend, dir, pi, delta)
     }
 
-    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, _, ref dir, ref pi, _) = data;
-        let mut mv = mv.borrow_mut();
-        let mut bb = bb.borrow_mut();
-
+    fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) -> Trans {
         let mut no_left = false;
         if bb.cannot_go_left_frames > 0 {
             bb.cannot_go_left_frames -= 1;
@@ -182,16 +243,21 @@ impl State<PlayerData> for Jumping {
         trans
     }
 
-    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, _, _, ref pi, ref time) = data;
-        let mut mv = mv.borrow_mut();
-        let mut bb = bb.borrow_mut();
-
-        let y_vel = PC::GRAVITY * seconds(&time.time) + mv.velocity.y;
+    fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
+        let y_vel = PC::GRAVITY * seconds(&delta.time) + mv.velocity.y;
         mv.velocity.y = y_vel.max(PC::MAX_FALLING_SPEED);
         // let gl = player.lg.grab_ledge(&mut mv, &pi, terrain);
 
-        if bb.on_ground {
+        let trans = if bb.on_ground {
             Trans::Pop
         } else
         /*if gl {
@@ -202,15 +268,22 @@ impl State<PlayerData> for Jumping {
             Trans::None
         } else {
             Trans::None
-        }
+        };
+        trans
     }
 
-    fn fixed_update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (ref mv, ref bb, _, _, _, _) = data;
-        let mut bb = bb.borrow_mut();
-
+    fn fixed_update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) -> Trans {
         if bb.frames_from_jump_start <= PC::JUMP_FRAMES_THRESHOLD {
-            if bb.at_ceiling || mv.borrow().velocity.y > 0.0 {
+            if bb.at_ceiling || mv.velocity.y > 0.0 {
                 bb.frames_from_jump_start = PC::JUMP_FRAMES_THRESHOLD + 1;
             }
         }
@@ -222,17 +295,33 @@ impl State<PlayerData> for Jumping {
 
 pub struct Sliding;
 
-impl State<PlayerData> for Sliding {
-    fn on_start(&mut self, data: &mut PlayerData) {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        anim.borrow_mut().sequence = PlayerAnimations::slide();
-        println!("sliding!");
+impl State for Sliding {
+    fn on_start(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        anim.sequence = PlayerAnimations::slide();
+        rend.tpe.set_animation_id(player::P_SLIDE, 10);
     }
 
-    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (_, _, ref anim, _, ref pi, _) = data;
+    fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         let trans = if pi.jump {
-            anim.borrow_mut().sequence = PlayerAnimations::jump();
+            anim.sequence = PlayerAnimations::jump();
             Trans::Switch(Box::new(Jumping))
         } else {
             Trans::None
@@ -240,13 +329,30 @@ impl State<PlayerData> for Sliding {
         trans
     }
 
-    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
+    fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         Trans::None
     }
 
-    fn fixed_update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        if anim.borrow_mut().sequence.is_over() {
+    fn fixed_update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
+        if anim.sequence.is_over() {
             Trans::Pop
         } else {
             Trans::None
@@ -262,15 +368,31 @@ pub struct Attacking;
 //     }
 // }
 
-impl State<PlayerData> for Attacking {
-    fn on_start(&mut self, data: &mut PlayerData) {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        anim.borrow_mut().sequence = PlayerAnimations::attack();
-        println!("Attack!");
+impl State for Attacking {
+    fn on_start(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
+        rend.tpe.set_animation_id(player::P_ATTACK, 10);
+        anim.sequence = PlayerAnimations::attack();
     }
 
-    fn handle_events(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (_, _, _, _, ref pi, _) = data;
+    fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         // let t = if self.can_cancel(player) {
         //     if pi.jump {
         //         Trans::Switch(Box::new(Jumping))
@@ -288,17 +410,33 @@ impl State<PlayerData> for Attacking {
         Trans::None
     }
 
-    fn fixed_update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (_, _, ref anim, _, _, _) = data;
-        if anim.borrow_mut().sequence.is_over() {
+    fn fixed_update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
+        if anim.sequence.is_over() {
             Trans::Pop
         } else {
             Trans::None
         }
     }
 
-    fn update(&mut self, data: &mut PlayerData) -> Trans<PlayerData> {
-        let &mut (_, _, _, _, _, _) = data;
+    fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) -> Trans {
         Trans::None
     }
 }
@@ -306,19 +444,19 @@ impl State<PlayerData> for Attacking {
 // pub struct LedgeGrab;
 
 // impl State for LedgeGrab {
-//     fn on_start(&mut self,  data: &mut PlayerData) {
+//     fn on_start(&mut self,   mv: &mut MovingObject,         bb: &mut HasAABB,         anim: &mut HasAnimationSequence,         rend: &mut Renderable,         dir: &Directional,         pi: &PlayerInput,         delta: &DeltaTime,) {
 //         player.data.idle.reset();
 //         player.dj.enable();
 //     }
-//     fn on_resume(&mut self,  data: &mut PlayerData) {
+//     fn on_resume(&mut self,   mv: &mut MovingObject,         bb: &mut HasAABB,         anim: &mut HasAnimationSequence,         rend: &mut Renderable,         dir: &Directional,         pi: &PlayerInput,         delta: &DeltaTime,) {
 //         self.on_start(player);
 //     }
 //     /// Executed on every frame before updating, for use in reacting to events.
-//     fn handle_events(&mut self, _ data: &mut PlayerData) -> Trans {
+//     fn handle_events(&mut self, _  mv: &mut MovingObject,         bb: &mut HasAABB,         anim: &mut HasAnimationSequence,         rend: &mut Renderable,         dir: &Directional,         pi: &PlayerInput,         delta: &DeltaTime,) -> Trans {
 //         Trans::None
 //     }
 
-//     fn update(&mut self,  data: &mut PlayerData, duration: &Duration, terrain: &Terrain) -> Trans {
+//     fn update(&mut self,   mv: &mut MovingObject,         bb: &mut HasAABB,         anim: &mut HasAnimationSequence,         rend: &mut Renderable,         dir: &Directional,         pi: &PlayerInput,         delta: &DeltaTime,, duration: &Duration, terrain: &Terrain) -> Trans {
 //         mv.update_physics(duration, terrain);
 
 //         let ledge_on_left =
@@ -345,7 +483,7 @@ impl State<PlayerData> for Attacking {
 //         state
 //     }
 
-//     fn fixed_update(&mut self,  data: &mut PlayerData) -> Trans {
+//     fn fixed_update(&mut self,   mv: &mut MovingObject,         bb: &mut HasAABB,         anim: &mut HasAnimationSequence,         rend: &mut Renderable,         dir: &Directional,         pi: &PlayerInput,         delta: &DeltaTime,) -> Trans {
 //         player.data.idle.roll_frames();
 //         Trans::None
 //     }

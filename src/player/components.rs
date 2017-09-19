@@ -1,5 +1,4 @@
 use player::state_machine::StateMachine;
-use player::state::PlayerData;
 use specs::*;
 
 #[derive(Debug, Component, Default)]
@@ -7,9 +6,9 @@ use specs::*;
 pub struct Controlled;
 
 #[derive(Component)]
-#[component(HashMapStorage)]
+#[component(DenseVecStorage)]
 pub struct PlayerStateMachine {
-    pub machine: StateMachine<PlayerData>,
+    pub machine: StateMachine,
 }
 
 #[derive(Component, Default)]

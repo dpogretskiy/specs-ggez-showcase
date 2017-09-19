@@ -5,49 +5,121 @@ use std::fmt::Error;
 use std::result::Result;
 use std::time::Duration;
 
-pub enum Trans<T> {
+use components::*;
+use rendering::animation_seq::*;
+use resources::*;
+use systems::*;
+
+pub enum Trans {
     None,
     Pop,
-    Push(Box<State<T>>),
-    Switch(Box<State<T>>),
+    Push(Box<State>),
+    Switch(Box<State>),
     Quit,
 }
 
-pub trait State<T> {
-    fn on_start(&mut self, _data: &mut T) {}
-    fn on_stop(&mut self, _data: &mut T) {}
-    fn on_pause(&mut self, _data: &mut T) {}
-    fn on_resume(&mut self, _data: &mut T) {}
+pub trait State {
+    fn on_start(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) {
+    }
+    fn on_stop(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) {
+    }
+    fn on_pause(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) {
+    }
+    fn on_resume(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) {
+    }
 
     /// Executed on every frame before updating, for use in reacting to events.
-    fn handle_events (&mut self, _data: &mut T) -> Trans<T> {
+    fn handle_events(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) -> Trans {
         Trans::None
     }
 
     /// Executed repeatedly at stable, predictable intervals (1/60th of a second
     /// by default).
-    fn fixed_update (&mut self, _data: &mut T) -> Trans<T> {
+    fn fixed_update(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) -> Trans {
         Trans::None
     }
 
     /// Executed on every frame immediately, as fast as the engine will allow.
-    fn update (&mut self, _data: &mut T) -> Trans<T> {
+    fn update(
+        &mut self,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
+    ) -> Trans {
         Trans::None
     }
 }
 
-unsafe impl<T> Sync for StateMachine<T> {}
-unsafe impl<T> Send for StateMachine<T> {}
+unsafe impl Sync for StateMachine {}
+unsafe impl Send for StateMachine {}
 
-pub struct StateMachine<T> {
+pub struct StateMachine {
     running: bool,
-    state_stack: Vec<Box<State<T>>>,
+    state_stack: Vec<Box<State>>,
 }
 
-impl<T> StateMachine<T> {
-    pub fn new<S>(initial_state: S) -> StateMachine<T>
+impl StateMachine {
+    pub fn new<S>(initial_state: S) -> StateMachine
     where
-        S: State<T> + 'static, {
+        S: State + 'static, {
         StateMachine {
             running: false,
             state_stack: vec![Box::new(initial_state)],
@@ -58,101 +130,185 @@ impl<T> StateMachine<T> {
         self.running
     }
 
-    pub fn start (&mut self, data: &mut T) {
+    pub fn start(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if !self.running {
             let state = self.state_stack.last_mut().unwrap();
-            state.on_start(data);
+            state.on_start(mv, bb, anim, rend, dir, pi, delta);
             self.running = true;
         }
     }
 
-    pub fn handle_events (&mut self, data: &mut T) {
+    pub fn handle_events(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
-                Some(state) => state.handle_events(data),
+                Some(state) => state.handle_events(mv, bb, anim, rend, dir, pi, delta),
                 None => Trans::None,
             };
 
-            self.transition(trans, data);
+            self.transition(trans, mv, bb, anim, rend, dir, pi, delta);
         }
     }
 
-    pub fn fixed_update (&mut self, data: &mut T) {
+    pub fn fixed_update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
-                Some(state) => state.fixed_update(data),
+                Some(state) => state.fixed_update(mv, bb, anim, rend, dir, pi, delta),
                 None => Trans::None,
             };
 
-            self.transition(trans, data);
+            self.transition(trans, mv, bb, anim, rend, dir, pi, delta);
         }
     }
 
-    pub fn update (&mut self, data: &mut T) {
+    pub fn update(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             let trans = match self.state_stack.last_mut() {
-                Some(state) => state.update(data),
+                Some(state) => state.update(mv, bb, anim, rend, dir, pi, delta),
                 None => Trans::None,
             };
 
-            self.transition(trans, data);
+            self.transition(trans, mv, bb, anim, rend, dir, pi, delta);
         }
     }
 
-    fn transition (&mut self, request: Trans<T>, data: &mut T) {
+    fn transition(
+        &mut self,
+        request: Trans,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             match request {
                 Trans::None => (),
-                Trans::Pop => self.pop(data),
-                Trans::Push(state) => self.push(state, data),
-                Trans::Switch(state) => self.switch(state, data),
-                Trans::Quit => self.stop(data),
+                Trans::Pop => self.pop(mv, bb, anim, rend, dir, pi, delta),
+                Trans::Push(state) => self.push(state, mv, bb, anim, rend, dir, pi, delta),
+                Trans::Switch(state) => self.switch(state, mv, bb, anim, rend, dir, pi, delta),
+                Trans::Quit => self.stop(mv, bb, anim, rend, dir, pi, delta),
             }
         }
     }
 
-    fn switch (&mut self, state: Box<State<T>>, data: &mut T) {
+    fn switch(
+        &mut self,
+        state: Box<State>,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             if let Some(mut state) = self.state_stack.pop() {
-                state.on_stop(data)
+                state.on_stop(mv, bb, anim, rend, dir, pi, delta)
             }
 
             self.state_stack.push(state);
             let state = self.state_stack.last_mut().unwrap();
-            state.on_start(data);
+            state.on_start(mv, bb, anim, rend, dir, pi, delta);
         }
     }
 
-    fn push (&mut self, state: Box<State<T>>, data: &mut T) {
+    fn push(
+        &mut self,
+        state: Box<State>,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             if let Some(state) = self.state_stack.last_mut() {
-                state.on_pause(data);
+                state.on_pause(mv, bb, anim, rend, dir, pi, delta);
             }
 
             self.state_stack.push(state);
             let state = self.state_stack.last_mut().unwrap();
-            state.on_start(data);
+            state.on_start(mv, bb, anim, rend, dir, pi, delta);
         }
     }
 
-    fn pop (&mut self, data: &mut T) {
+    fn pop(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             if let Some(mut state) = self.state_stack.pop() {
-                state.on_stop(data);
+                state.on_stop(mv, bb, anim, rend, dir, pi, delta);
             }
 
             if let Some(state) = self.state_stack.last_mut() {
-                state.on_resume(data);
+                state.on_resume(mv, bb, anim, rend, dir, pi, delta);
             } else {
                 self.running = false;
             }
         }
     }
 
-    fn stop (&mut self, data: &mut T) {
+    fn stop(
+        &mut self,
+        mv: &mut MovingObject,
+        bb: &mut HasAABB,
+        anim: &mut HasAnimationSequence,
+        rend: &mut Renderable,
+        dir: &Directional,
+        pi: &PlayerInput,
+        delta: &DeltaTime,
+    ) {
         if self.running {
             while let Some(mut state) = self.state_stack.pop() {
-                state.on_stop(data);
+                state.on_stop(mv, bb, anim, rend, dir, pi, delta);
             }
 
             self.running = false;

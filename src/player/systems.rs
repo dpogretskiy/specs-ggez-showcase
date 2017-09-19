@@ -1,5 +1,4 @@
 use components::*;
-use player::components::*;
 use player::consts as PC;
 use rendering::animation_seq::*;
 use resources::*;
@@ -8,11 +7,9 @@ use std::rc::Rc;
 
 pub struct PlayerDirectionSystem;
 impl<'a> System<'a> for PlayerDirectionSystem {
-    type SystemData = (
-        WriteStorage<'a, Directional>,
-        ReadStorage<'a, Controlled>,
-        Fetch<'a, PlayerInput>,
-    );
+    type SystemData = (WriteStorage<'a, Directional>,
+     ReadStorage<'a, Controlled>,
+     Fetch<'a, PlayerInput>);
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
         for (mut dir, _) in (&mut directional, &controlled).join() {
@@ -27,16 +24,15 @@ impl<'a> System<'a> for PlayerDirectionSystem {
     }
 }
 
-type SMSD<'a> = (
-    ReadStorage<'a, Controlled>,
-    WriteStorage<'a, PlayerStateMachine>,
-    WriteStorage<'a, MovingObject>,
-    WriteStorage<'a, HasAABB>,
-    WriteStorage<'a, HasAnimationSequence>,
-    WriteStorage<'a, Directional>,
-    Fetch<'a, PlayerInput>,
-    Fetch<'a, DeltaTime>,
-);
+type SMSD<'a> = (ReadStorage<'a, Controlled>,
+                 WriteStorage<'a, PlayerStateMachine>,
+                 WriteStorage<'a, MovingObject>,
+                 WriteStorage<'a, HasAABB>,
+                 WriteStorage<'a, HasAnimationSequence>,
+                 WriteStorage<'a, Renderable>,
+                 WriteStorage<'a, Directional>,
+                 Fetch<'a, PlayerInput>,
+                 Fetch<'a, DeltaTime>);
 
 
 pub struct PlayerUpdateSystem;
@@ -44,29 +40,20 @@ impl<'a> System<'a> for PlayerUpdateSystem {
     type SystemData = SMSD<'a>;
 
     fn run(&mut self, data: Self::SystemData) {
-        use std::cell::RefCell;
-        use std::mem;
+        let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        let (controlled, mut sm, mut mv, mut bb, mut anim, dir, input, time) = data;
-
-        for (_, sm, mv, bb, anim, dir) in
-            (&controlled, &mut sm, &mut mv, &mut bb, &mut anim, &dir).join()
+        for (_, sm, mv, bb, anim, rend, dir) in
+            (
+                &controlled,
+                &mut sm,
+                &mut mv,
+                &mut bb,
+                &mut anim,
+                &mut rend,
+                &dir,
+            ).join()
         {
-            let mvrc = RefCell::new(mv.clone());
-            let bbrc = RefCell::new(bb.clone());
-            let animrc = RefCell::new(anim.clone());
-            sm.machine.update(&mut (
-                mvrc.clone(),
-                bbrc.clone(),
-                animrc.clone(),
-                (*dir).clone(),
-                (*input).clone(),
-                (*time).clone(),
-            ));
-
-            mem::swap(mv, &mut mvrc.into_inner());
-            mem::swap(bb, &mut bbrc.into_inner());
-            mem::swap(anim, &mut animrc.into_inner())
+            sm.machine.update(mv, bb, anim, rend, dir, &*input, &*time);
         }
     }
 }
@@ -76,33 +63,20 @@ impl<'a> System<'a> for PlayerFixedUpdateSystem {
     type SystemData = SMSD<'a>;
 
     fn run(&mut self, data: Self::SystemData) {
-        use std::cell::RefCell;
-        use std::mem;
+        let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        let (controlled, mut sm, mut mv, mut bb, mut anim, dir, input, time) = data;
-
-        for (_, sm, mv, bb, anim, dir) in
-            (&controlled, &mut sm, &mut mv, &mut bb, &mut anim, &dir).join()
+        for (_, sm, mv, bb, anim, rend, dir) in
+            (
+                &controlled,
+                &mut sm,
+                &mut mv,
+                &mut bb,
+                &mut anim,
+                &mut rend,
+                &dir,
+            ).join()
         {
-            let mvrc = Rc::new(RefCell::new(mv.clone()));
-            let bbrc = Rc::new(RefCell::new(bb.clone()));
-            let animrc = Rc::new(RefCell::new(anim.clone()));
-            {
-                sm.machine.fixed_update(&mut (
-                    mvrc.clone(),
-                    bbrc.clone(),
-                    animrc.clone(),
-                    (*dir).clone(),
-                    (*input).clone(),
-                    (*time).clone(),
-                ));
-            }
-
-            println!("MV: {:?}", mvrc.borrow().borrow());
-
-            mem::swap(mv, &mut mvrc.into_inner());
-            mem::swap(bb, &mut bbrc.into_inner());
-            mem::swap(anim, &mut animrc.into_inner())
+            sm.machine.fixed_update(mv, bb, anim, rend, dir, &*input, &*time);
         }
     }
 }
@@ -112,87 +86,67 @@ impl<'a> System<'a> for PlayerHandleEventsSystem {
     type SystemData = SMSD<'a>;
 
     fn run(&mut self, data: Self::SystemData) {
-        use std::cell::RefCell;
-        use std::mem;
+        let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        let (controlled, mut sm, mut mv, mut bb, mut anim, dir, input, time) = data;
-
-        for (_, sm, mv, bb, anim, dir) in
-            (&controlled, &mut sm, &mut mv, &mut bb, &mut anim, &dir).join()
+        for (_, sm, mv, bb, anim, rend, dir) in
+            (
+                &controlled,
+                &mut sm,
+                &mut mv,
+                &mut bb,
+                &mut anim,
+                &mut rend,
+                &dir,
+            ).join()
         {
-            let mvrc = RefCell::new(mv.clone());
-            let bbrc = RefCell::new(bb.clone());
-            let animrc = RefCell::new(anim.clone());
-            sm.machine.handle_events(&mut (
-                mvrc.clone(),
-                bbrc.clone(),
-                animrc.clone(),
-                (*dir).clone(),
-                (*input).clone(),
-                (*time).clone(),
-            ));
-
-            mem::swap(mv, &mut mvrc.into_inner());
-            mem::swap(bb, &mut bbrc.into_inner());
-            mem::swap(anim, &mut animrc.into_inner())
+            sm.machine.handle_events(mv, bb, anim, rend, dir, &*input, &*time);
         }
     }
 }
 
 pub struct StartPSMSystem;
 impl<'a> System<'a> for StartPSMSystem {
-    type SystemData = (
-        Entities<'a>,
-        WriteStorage<'a, StartPSM>,
-        ReadStorage<'a, Controlled>,
-        WriteStorage<'a, PlayerStateMachine>,
-        WriteStorage<'a, MovingObject>,
-        WriteStorage<'a, HasAABB>,
-        WriteStorage<'a, HasAnimationSequence>,
-        WriteStorage<'a, Directional>,
-        Fetch<'a, PlayerInput>,
-        Fetch<'a, DeltaTime>,
-    );
-
+    type SystemData = (Entities<'a>,
+     WriteStorage<'a, StartPSM>,
+     ReadStorage<'a, Controlled>,
+     WriteStorage<'a, PlayerStateMachine>,
+     WriteStorage<'a, MovingObject>,
+     WriteStorage<'a, HasAABB>,
+     WriteStorage<'a, HasAnimationSequence>,
+     WriteStorage<'a, Renderable>,
+     WriteStorage<'a, Directional>,
+     Fetch<'a, PlayerInput>,
+     Fetch<'a, DeltaTime>);
 
     fn run(&mut self, data: Self::SystemData) {
-        use std::cell::RefCell;
-        use std::mem;
-        let (e, mut start, controlled, mut sm, mut mv, mut bb, mut anim, dir, input, time) = data;
-
-        for s in start.join() {
-            println!("Start!");
-        }
+        let (e,
+             mut start,
+             controlled,
+             mut sm,
+             mut mv,
+             mut bb,
+             mut anim,
+             mut rend,
+             dir,
+             input,
+             time) = data;
 
         let mut rem = vec![];
 
-        for (e, _, _, sm, mv, bb, anim, dir) in (
-            &*e,
-            &mut start,
-            &controlled,
-            &mut sm,
-            &mut mv,
-            &mut bb,
-            &mut anim,
-            &dir,
-        ).join()
+        for (e, _, _, sm, mv, bb, anim, rend, dir) in
+            (
+                &*e,
+                &mut start,
+                &controlled,
+                &mut sm,
+                &mut mv,
+                &mut bb,
+                &mut anim,
+                &mut rend,
+                &dir,
+            ).join()
         {
-            println!("Starting some!: {:?}", e);
-            let mvrc = RefCell::new(mv.clone());
-            let bbrc = RefCell::new(bb.clone());
-            let animrc = RefCell::new(anim.clone());
-            sm.machine.start(&mut (
-                mvrc.clone(),
-                bbrc.clone(),
-                animrc.clone(),
-                (*dir).clone(),
-                (*input).clone(),
-                (*time).clone(),
-            ));
-
-            mem::swap(mv, &mut mvrc.into_inner());
-            mem::swap(bb, &mut bbrc.into_inner());
-            mem::swap(anim, &mut animrc.into_inner());
+            sm.machine.start(mv, bb, anim, rend, dir, &*input, &*time);
             rem.push(e);
         }
 
@@ -202,22 +156,35 @@ impl<'a> System<'a> for StartPSMSystem {
     }
 }
 
+pub struct ResetInputSystem;
+impl<'a> System<'a> for ResetInputSystem {
+    type SystemData = FetchMut<'a, PlayerInput>;
+
+    fn run(&mut self, mut input: Self::SystemData) {
+        input.reset_actions();
+    }
+}
+
 pub struct PlayerAux;
 impl PlayerAux {
     pub fn movement(mv: &mut MovingObject, bb: &HasAABB, direction: &Directional) {
         match *direction {
-            Directional::Left => if bb.pushes_left_wall {
-                PlayerAux::stop(mv);
-            } else {
-                mv.accel.x = -PC::WALK_ACCEL;
-                mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
-            },
-            Directional::Right => if bb.pushes_right_wall {
-                PlayerAux::stop(mv);
-            } else {
-                mv.accel.x = PC::WALK_ACCEL;
-                mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
-            },
+            Directional::Left => {
+                if bb.pushes_left_wall {
+                    PlayerAux::stop(mv);
+                } else {
+                    mv.accel.x = -PC::WALK_ACCEL;
+                    mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
+                }
+            }
+            Directional::Right => {
+                if bb.pushes_right_wall {
+                    PlayerAux::stop(mv);
+                } else {
+                    mv.accel.x = PC::WALK_ACCEL;
+                    mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
+                }
+            }
         }
     }
 

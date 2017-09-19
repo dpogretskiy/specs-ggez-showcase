@@ -33,7 +33,7 @@ impl<'a> System<'a> for HasAABBSystem {
         let (mut has_aabb, mut mv, level) = data;
         let terrain = &level.terrain;
 
-        (&mut has_aabb, &mut mv).par_join().for_each(|(ref mut bb, ref mut mv)| {
+        (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
             bb.was_on_ground = bb.on_ground;
             bb.was_at_ceiling = bb.at_ceiling;
             bb.pushed_left_wall = bb.pushes_left_wall;
@@ -105,7 +105,7 @@ impl<'a> System<'a> for PositionSystem {
 
     fn run(&mut self, data: Self::SystemData) {
         let (mv, mut pos) = data;
-        (&mv, &mut pos).par_join().for_each(|(ref mv, ref mut pos)| {
+        (&mv, &mut pos).par_join().for_each(|(mv, pos)| {
             pos.x = mv.position.x as f32;
             pos.y = mv.position.y as f32;
         });

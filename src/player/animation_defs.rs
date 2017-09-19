@@ -14,12 +14,12 @@ impl PlayerAnimations {
     pub fn jump() -> AnimationSequence {
         to_seq(Animation::seq(vec![
             Animation::play(0, 4),
-            Animation::forever(Animation::play(5, 8)),
+            PlayerAnimations::drop().animation
         ]))
     }
 
     pub fn drop() -> AnimationSequence {
-        to_seq(Animation::forever(Animation::play(5, 8)))
+        to_seq(Animation::forever(Animation::repeat(5, Animation::play(6, 6))))
     }
 
     pub fn run() -> AnimationSequence {

@@ -20,12 +20,18 @@ impl PlayerLoader {
         let sliding = Loader::load_sprite_sheet(ctx, "/slide")?;
 
         asset_storage.animations.extend(vec![
-            ("player-idle", Animation::new(idle)),
-            ("player-attack", Animation::new(attacking)),
-            ("player-jump", Animation::new(jumping)),
-            ("player-run", Animation::new(running)),
-            ("player-slide", Animation::new(sliding)),
+            (P_IDLE, Animation::new(idle)),
+            (P_ATTACK, Animation::new(attacking)),
+            (P_JUMP, Animation::new(jumping)),
+            (P_RUN, Animation::new(running)),
+            (P_SLIDE, Animation::new(sliding)),
         ]);
         Ok(())
     }
 }
+
+const P_IDLE: &str = "player-idle";
+const P_ATTACK: &str = "player-attack";
+const P_JUMP: &str = "player-jump";
+const P_RUN: &str = "player-run";
+const P_SLIDE: &str = "player-slide";

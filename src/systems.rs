@@ -3,10 +3,10 @@ use camera::*;
 use components::*;
 use ggez::Context;
 use ggez::graphics::*;
+use rendering::animation_seq::*;
 use specs::*;
 use std::collections::BTreeMap;
 use util::Vector2;
-use rendering::animation_seq::*;
 
 pub use physics::systems::*;
 pub use player::systems::*;
@@ -38,7 +38,7 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
         let mut layers = BTreeMap::new();
 
         for (e, r, pos) in (&*entities, &renderable, &position).join() {
-            let mut scale = scalable.get(e).unwrap_or_else(|| &default_scale).clone();
+            let mut scale: Scalable = scalable.get(e).unwrap_or_else(|| &default_scale).clone();
 
             if let Some(&Directional::Left) = directional.get(e) {
                 scale.x = -scale.x;
@@ -105,20 +105,34 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
 
 pub struct CameraSnapSystem;
 impl<'a> System<'a> for CameraSnapSystem {
-    type SystemData = (FetchMut<'a, Camera>, ReadStorage<'a, Position>);
+    type SystemData = (FetchMut<'a, Camera>, ReadStorage<'a, Position>, ReadStorage<'a, SnapCamera>);
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut camera, position) = data;
+        let (mut camera, position, snap) = data;
 
-        for p in position.join() {
+        for (p, _) in (&position, &snap).join() {
             camera.move_to(Vector2::new(p.x as f64, p.y as f64));
         }
     }
 }
 
+pub struct ChaseCameraSystem;
+impl<'a> System<'a> for ChaseCameraSystem {
+    type SystemData = (Fetch<'a, Camera>, ReadStorage<'a, ChaseCamera>, WriteStorage<'a, Position>);
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (cam, chase, mut pos) = data;
+
+        for (pos, _) in (&mut pos, &chase).join() {
+            let loc = cam.location();
+            pos.x = loc.x as f32;
+            pos.y = loc.y as f32;
+        }
+    }
+}
 
 pub struct AnimationFFSystem;
-impl <'a> System<'a> for AnimationFFSystem {
+impl<'a> System<'a> for AnimationFFSystem {
     type SystemData = (WriteStorage<'a, HasAnimationSequence>, WriteStorage<'a, Renderable>);
 
     fn run(&mut self, data: Self::SystemData) {
@@ -126,12 +140,16 @@ impl <'a> System<'a> for AnimationFFSystem {
 
         for (anim, rend) in (&mut anim, &mut rend).join() {
             match rend.tpe {
-                RenderableType::Animation { ref id, ref mut frame, ref length } => {
+                RenderableType::Animation {
+                    ref id,
+                    ref mut frame,
+                    ref length,
+                } => {
                     if let Some(next) = anim.sequence.next() {
                         *frame = next;
                     }
-                },
-                _ => ()
+                }
+                _ => (),
             }
 
         }

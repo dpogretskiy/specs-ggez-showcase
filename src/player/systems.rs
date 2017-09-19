@@ -4,6 +4,7 @@ use player::consts as PC;
 use rendering::animation_seq::*;
 use resources::*;
 use specs::*;
+use std::rc::Rc;
 
 pub struct PlayerDirectionSystem;
 impl<'a> System<'a> for PlayerDirectionSystem {
@@ -83,17 +84,21 @@ impl<'a> System<'a> for PlayerFixedUpdateSystem {
         for (_, sm, mv, bb, anim, dir) in
             (&controlled, &mut sm, &mut mv, &mut bb, &mut anim, &dir).join()
         {
-            let mvrc = RefCell::new(mv.clone());
-            let bbrc = RefCell::new(bb.clone());
-            let animrc = RefCell::new(anim.clone());
-            sm.machine.fixed_update(&mut (
-                mvrc.clone(),
-                bbrc.clone(),
-                animrc.clone(),
-                (*dir).clone(),
-                (*input).clone(),
-                (*time).clone(),
-            ));
+            let mvrc = Rc::new(RefCell::new(mv.clone()));
+            let bbrc = Rc::new(RefCell::new(bb.clone()));
+            let animrc = Rc::new(RefCell::new(anim.clone()));
+            {
+                sm.machine.fixed_update(&mut (
+                    mvrc.clone(),
+                    bbrc.clone(),
+                    animrc.clone(),
+                    (*dir).clone(),
+                    (*input).clone(),
+                    (*time).clone(),
+                ));
+            }
+
+            println!("MV: {:?}", mvrc.borrow().borrow());
 
             mem::swap(mv, &mut mvrc.into_inner());
             mem::swap(bb, &mut bbrc.into_inner());
@@ -146,7 +151,8 @@ impl<'a> System<'a> for StartPSMSystem {
         WriteStorage<'a, HasAnimationSequence>,
         WriteStorage<'a, Directional>,
         Fetch<'a, PlayerInput>,
-        Fetch<'a, DeltaTime>);
+        Fetch<'a, DeltaTime>,
+    );
 
 
     fn run(&mut self, data: Self::SystemData) {
@@ -159,9 +165,17 @@ impl<'a> System<'a> for StartPSMSystem {
         }
 
         let mut rem = vec![];
-        
-        for (e, _, _, sm, mv, bb, anim, dir) in
-            (&*e, &mut start, &controlled, &mut sm, &mut mv, &mut bb, &mut anim, &dir).join()
+
+        for (e, _, _, sm, mv, bb, anim, dir) in (
+            &*e,
+            &mut start,
+            &controlled,
+            &mut sm,
+            &mut mv,
+            &mut bb,
+            &mut anim,
+            &dir,
+        ).join()
         {
             println!("Starting some!: {:?}", e);
             let mvrc = RefCell::new(mv.clone());

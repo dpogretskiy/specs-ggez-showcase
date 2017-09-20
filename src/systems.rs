@@ -62,9 +62,9 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
                                     &*camera,
                                     self.ctx,
                                     DrawParam {
-                                        dest: Point::new(pos.x, pos.y),
+                                        dest: Point2::new(pos.x, pos.y),
                                         src: frame,
-                                        scale: Point::new(scale.x, scale.y),
+                                        scale: Point2::new(scale.x, scale.y),
                                         ..Default::default()
                                     },
                                 ).unwrap();
@@ -77,8 +77,8 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
                                 &*camera,
                                 self.ctx,
                                 DrawParam {
-                                    dest: Point::new(pos.x, pos.y),
-                                    scale: Point::new(scale.x, scale.y),
+                                    dest: Point2::new(pos.x, pos.y),
+                                    scale: Point2::new(scale.x, scale.y),
                                     ..Default::default()
                                 },
                             ).unwrap();
@@ -90,8 +90,8 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
                                 &*camera,
                                 self.ctx,
                                 DrawParam {
-                                    dest: Point::new(pos.x, pos.y),
-                                    scale: Point::new(scale.x, scale.y),
+                                    dest: Point2::new(pos.x, pos.y),
+                                    scale: Point2::new(scale.x, scale.y),
                                     ..Default::default()
                                 },
                             ).unwrap();

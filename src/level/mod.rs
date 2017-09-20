@@ -1272,11 +1272,11 @@ impl RenderableLevel {
                     if let Some(rect) = rect {
                         let dp = DrawParam {
                             src: graphics::Rect::from(rect),
-                            dest: graphics::Point::new(
+                            dest: graphics::Point2::new(
                                 (h * 128) as f32,
                                 -((pixel_height - v * 128) as f32),
                             ),
-                            scale: graphics::Point::new(1.0, 1.0),
+                            scale: graphics::Point2::new(1.0, 1.0),
                             ..Default::default()
                         };
 

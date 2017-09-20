@@ -25,16 +25,20 @@ pub use rendering::asset_storage;
 pub use rendering::camera;
 
 use game::*;
-use ggez::{Context, conf, event, graphics};
+use ggez::conf::*;
+use ggez::{Context, event, graphics};
 
 // use cpuprofiler::PROFILER;
 
 fn main() {
-    let c = conf::Conf {
+    let c = Conf {
         window_width: 1600,
         window_height: 1000,
-        resizable: false,
-        vsync: false,
+        window_mode: WindowMode
+            ::default()
+            .borderless(true)
+            .vsync(false)
+            .samples(NumSamples::One),
         ..Default::default()
     };
     let ctx = &mut Context::load_from_conf("config", "me", c).unwrap();

@@ -102,14 +102,14 @@ impl<'a, 'b> Game<'a, 'b> {
                 "p.handle_events",
                 &["p.direct"],
             )
-            .add(MovingSystem, "moving", &[])
-            .add(HasAABBSystem, "has_aabb", &["moving"])
+            // .add(MovingSystem, "moving", &[])
+            .add(AABBMovingSystem, "has_aabb", &[])
             .add(
                 PlayerUpdateSystem,
                 "p.update",
                 &["p.handle_events"],
             )
-            .add(PositionSystem, "position", &["moving", "has_aabb"])
+            .add(PositionSystem, "position", &["has_aabb"])
             .add(
                 ResetInputSystem,
                 "p.reset_input",
@@ -125,13 +125,10 @@ impl<'a, 'b> Game<'a, 'b> {
 
 impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
-        use cpuprofiler::PROFILER;
 
         if timer::get_ticks(ctx) % 100 == 0 {
             println!("FPS: {}", timer::get_fps(ctx));
         }
-
-        PROFILER.lock().unwrap().start("special.profile").expect("Some");
 
         self.world.write_resource::<DeltaTime>().time = dt;
 
@@ -142,8 +139,6 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
 
         self.dispatcher.dispatch(&mut self.world.res);
         self.world.maintain();
-
-        PROFILER.lock().unwrap().stop().expect("Some");
 
         Ok(())
     }
@@ -274,7 +269,6 @@ fn create_player(world: &mut World, snap_camera: bool, location: Vector2) {
         .with(scalable)
         .with(MovingObject::new(location))
         .with(HasAABB::new(AABB::new_full(
-            Vector2::new(500.0, 500.0),
             Vector2::new(290.0, 500.0) * player_scale,
             Vector2::new(0.7, 0.8),
         )));

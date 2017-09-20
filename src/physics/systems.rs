@@ -5,35 +5,44 @@ use resources::*;
 use specs::*;
 use util::*;
 
-pub struct MovingSystem;
-impl<'a> System<'a> for MovingSystem {
-    type SystemData = (WriteStorage<'a, MovingObject>, Fetch<'a, DeltaTime>);
+// pub struct MovingSystem;
+// impl<'a> System<'a> for MovingSystem {
+//     type SystemData = (WriteStorage<'a, MovingObject>, Fetch<'a, DeltaTime>);
 
-    fn run(&mut self, data: Self::SystemData) {
-        let (mut objects, time) = data;
-        let delta = seconds(&time.time);
+//     fn run(&mut self, data: Self::SystemData) {
+//         let (mut objects, time) = data;
+//         let delta = seconds(&time.time);
 
-        (&mut objects).par_join().for_each(|o| {
-            o.old_position = o.position;
-            o.old_velocity = o.velocity;
-            o.old_accel = o.accel;
-            o.velocity += o.accel * delta;
-            o.position += o.velocity * delta;
-        });
-    }
-}
+//         (&mut objects).par_join().for_each(|o| {
+//             o.old_position = o.position;
+//             o.old_velocity = o.velocity;
+//             o.old_accel = o.accel;
+//             o.velocity += o.accel * delta;
+//             o.position += o.velocity * delta;
+//         });
+//     }
+// }
 
-pub struct HasAABBSystem;
-impl<'a> System<'a> for HasAABBSystem {
-    type SystemData = (WriteStorage<'a, HasAABB>,
+pub struct AABBMovingSystem;
+impl<'a> System<'a> for AABBMovingSystem {
+    type SystemData = (
+     WriteStorage<'a, HasAABB>,
      WriteStorage<'a, MovingObject>,
-     Fetch<'a, LevelTerrain>);
+     Fetch<'a, LevelTerrain>,
+     Fetch<'a, DeltaTime>);
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut has_aabb, mut mv, level) = data;
+        let (mut has_aabb, mut mv, level, delta) = data;
         let terrain = &level.terrain;
+        let delta = seconds(&delta.time);
 
         (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
+            mv.old_position = mv.position;
+            mv.old_velocity = mv.velocity;
+            mv.old_accel = mv.accel;
+            mv.velocity += mv.accel * delta;
+            mv.position += mv.velocity * delta;
+
             bb.was_on_ground = bb.on_ground;
             bb.was_at_ceiling = bb.at_ceiling;
             bb.pushed_left_wall = bb.pushes_left_wall;
@@ -92,8 +101,6 @@ impl<'a> System<'a> for HasAABBSystem {
             } else {
                 bb.at_ceiling = false;
             }
-
-            bb.aabb.center = mv.position + bb.aabb.offset;
         });
     }
 }

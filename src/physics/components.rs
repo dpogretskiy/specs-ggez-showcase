@@ -117,6 +117,8 @@ impl HumanoidMovement {
                                    mv.position.y
                 {
                     bb.on_platform = true;
+                    println!("Math here: (({} - {})abs) == {} <= {}", checked_tile.y, *ground_y, (checked_tile.y - *ground_y).abs(), HumanoidMovement::PLATFORM_THRESHOLD + mv.old_position.y - mv.position.y);
+                    println!("on platform!: ({}, {}), ground_y: {}", checked_tile.x, checked_tile.y, ground_y);
                 };
                 if checked_tile.x >= bottom_right.x {
                     if bb.on_platform {
@@ -248,5 +250,5 @@ impl HumanoidMovement {
         false
     }
 
-    pub const PLATFORM_THRESHOLD: f64 = 2.0;
+    pub const PLATFORM_THRESHOLD: f64 = 1.0;
 }

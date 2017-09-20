@@ -50,8 +50,8 @@ impl Camera {
         self.view_center = to;
     }
 
-    pub fn draw_scale(&self) -> graphics::Point {
-        graphics::Point::new(
+    pub fn draw_scale(&self) -> graphics::Point2 {
+        graphics::Point2::new(
             (self.screen_size.x / self.view_size.x) as f32,
             (self.screen_size.y / self.view_size.y) as f32,
         )
@@ -102,9 +102,9 @@ impl Camera {
         self.view_size
     }
 
-    pub fn calculate_dest_point(&self, location: Vector2) -> graphics::Point {
+    pub fn calculate_dest_point(&self, location: Vector2) -> graphics::Point2 {
         let (sx, sy) = self.world_to_screen_coords(location);
-        graphics::Point::new(sx as f32, sy as f32)
+        graphics::Point2::new(sx as f32, sy as f32)
     }
 }
 
@@ -123,7 +123,7 @@ where
         let orig_scale = p.scale.clone();
         let mut my_p = p;
         my_p.dest = dest;
-        my_p.scale = graphics::Point::new(orig_scale.x * scale.x, orig_scale.y * scale.y);
+        my_p.scale = graphics::Point2::new(orig_scale.x * scale.x, orig_scale.y * scale.y);
         self.draw_ex(ctx, my_p)
     }
 
@@ -131,7 +131,7 @@ where
         &self,
         camera: &Camera,
         ctx: &mut ggez::Context,
-        dest: ggez::graphics::Point,
+        dest: ggez::graphics::Point2,
         rotation: f32,
     ) -> GameResult<()> {
         let dest = Vector2::new(dest.x as f64, dest.y as f64);

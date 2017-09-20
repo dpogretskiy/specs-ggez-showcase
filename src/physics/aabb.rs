@@ -3,21 +3,19 @@ use util::*;
 
 #[derive(Debug, Clone)]
 pub struct AABB {
-    pub center: Vector2,
     pub half_size: Vector2,
     pub scale: Vector2,
     pub offset: Vector2,
 }
 
 impl AABB {
-    pub fn new_full(center: Vector2, full_size: Vector2, scale: Vector2) -> AABB {
+    pub fn new_full(full_size: Vector2, scale: Vector2) -> AABB {
         let half_size = full_size / 2.0;
         let offset_y = -half_size.y * (1.0 - scale.y);
 
         let scaled_hs = Vector2::new(half_size.x * scale.x, half_size.y * scale.y);
 
         AABB {
-            center,
             half_size: scaled_hs,
             scale,
             offset: Vector2::new(0.0, offset_y),

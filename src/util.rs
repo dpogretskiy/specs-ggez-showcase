@@ -8,7 +8,7 @@ pub fn seconds(dur: &Duration) -> f64 {
 }
 
 pub fn lerp(v1: &Vector2, v2: &Vector2, by: f64) -> Vector2 {
-    v1 * (1.0 - by) + v2 * by
+    (v1 * (1.0 - by)) + v2 * by
 }
 
 pub fn round_vector(mut v: Vector2) -> Vector2 {

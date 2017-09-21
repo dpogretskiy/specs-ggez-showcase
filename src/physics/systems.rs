@@ -37,12 +37,14 @@ impl<'a> System<'a> for AABBMovingSystem {
         let delta = seconds(&delta.time);
 
         (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
+
             mv.old_position = mv.position;
             mv.old_velocity = mv.velocity;
             mv.old_accel = mv.accel;
             mv.velocity += mv.accel * delta;
             mv.position += mv.velocity * delta;
 
+            bb.was_on_platform = bb.on_platform;
             bb.was_on_ground = bb.on_ground;
             bb.was_at_ceiling = bb.at_ceiling;
             bb.pushed_left_wall = bb.pushes_left_wall;
@@ -102,6 +104,33 @@ impl<'a> System<'a> for AABBMovingSystem {
                 bb.at_ceiling = false;
             }
         });
+    }
+}
+
+pub struct CollisionSystem; 
+impl<'a> System<'a> for CollisionSystem {
+    type SystemData = (WriteStorage<'a, MovingObject>, ReadStorage<'a, HasAABB>, ReadStorage<'a, CollisionDetection>, Fetch<'a, LevelTerrain>);
+
+    fn run(&mut self, data: Self::SystemData) {
+        use physics::quad_tree::*;
+
+        let (mv, bb, cd, t) = data;
+
+        let terrain_rect = {
+            let x = t.terrain.position.x;
+            let y = t.terrain.position.y;
+            let w = t.terrain.width as f64 * t.terrain.tile_size;
+            let h = t.terrain.height as f64 * t.terrain.tile_size;
+            Rect::new(x, y, w, h)
+        };
+
+        let mut qt = QuadTree::new(terrain_rect);
+
+        for (mv, bb, _) in (&mv, &bb, &cd).join() {
+            let tup = (mv, bb);
+
+            qt.insert(&tup);
+        }
     }
 }
 

@@ -31,6 +31,7 @@ pub struct HasAABB {
     pub was_on_ground: bool,
     pub on_ground: bool,
 
+    pub was_on_platform: bool,
     pub on_platform: bool,
 
     pub was_at_ceiling: bool,
@@ -65,6 +66,7 @@ impl HasAABB {
             pushes_right_wall: false,
             was_on_ground: false,
             on_ground: false,
+            was_on_platform: false,
             on_platform: false,
             was_at_ceiling: false,
             at_ceiling: false,
@@ -113,22 +115,21 @@ impl HumanoidMovement {
                     return true;
                 } else if terrain.is_one_way_platform(tile_index_x, tile_index_y) &&
                            (checked_tile.y - *ground_y).abs() <=
-                               HumanoidMovement::PLATFORM_THRESHOLD + mv.old_position.y -
-                                   mv.position.y
-                {
+                               (HumanoidMovement::PLATFORM_THRESHOLD + mv.old_position.y -
+                                   mv.position.y) {
                     bb.on_platform = true;
-                    println!("Math here: (({} - {})abs) == {} <= {}", checked_tile.y, *ground_y, (checked_tile.y - *ground_y).abs(), HumanoidMovement::PLATFORM_THRESHOLD + mv.old_position.y - mv.position.y);
-                    println!("on platform!: ({}, {}), ground_y: {}", checked_tile.x, checked_tile.y, ground_y);
                 };
+
                 if checked_tile.x >= bottom_right.x {
                     if bb.on_platform {
                         return true;
-                    };
+                    }
                     break 'inner;
                 }
                 checked_tile.x += terrain.tile_size;
             }
         }
+
         false
     }
 
@@ -250,5 +251,10 @@ impl HumanoidMovement {
         false
     }
 
-    pub const PLATFORM_THRESHOLD: f64 = 1.0;
+    pub const PLATFORM_THRESHOLD: f64 = 2.0;
 }
+
+
+#[derive(Debug, Component)]
+#[component(VecStorage)]
+pub struct CollisionDetection;

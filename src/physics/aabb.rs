@@ -11,9 +11,9 @@ pub struct AABB {
 impl AABB {
     pub fn new_full(full_size: Vector2, scale: Vector2) -> AABB {
         let half_size = full_size / 2.0;
-        let offset_y = -half_size.y * (1.0 - scale.y);
+        let offset_y = (-half_size.y * (1.0 - scale.y)).round();
 
-        let scaled_hs = Vector2::new(half_size.x * scale.x, half_size.y * scale.y);
+        let scaled_hs = Vector2::new((half_size.x * scale.x).round(), (half_size.y * scale.y).round());
 
         AABB {
             half_size: scaled_hs,
@@ -45,14 +45,12 @@ impl AABB {
     }
 }
 
-
 pub enum Sensor {
     TopLeft,
     BottomLeft,
     TopRight,
     BottomRight,
 }
-
 
 pub struct SensorBuilder {
     vector: Vector2,
@@ -62,14 +60,7 @@ pub struct SensorBuilder {
 
 impl SensorBuilder {
     pub fn ok(self) -> Vector2 {
-        self.check();
         round_vector(self.vector)
-    }
-
-    fn check(&self) {
-        if self.hor > 2 || self.ver > 2 {
-            panic!(format!("Sensor is broken, dayum! {:?}", self.vector))
-        };
     }
 }
 
@@ -84,7 +75,7 @@ pub trait Disposition {
     fn right(self) -> Self;
 }
 
-const BY: f64 = 2.0;
+const BY: f64 = 1.0;
 
 impl Disposition for SensorBuilder {
     fn up(mut self) -> SensorBuilder {

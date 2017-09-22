@@ -12,8 +12,6 @@ specs = "*"
 specs-derive = "*"
 rayon = "0.7.1"
 
-cpuprofiler = "*"
-
 [dependencies.tilesheet-marker]
 path = "../spritesheet-marker"
 version = "0.0.1"

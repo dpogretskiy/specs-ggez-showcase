@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use super::LoadedAssets;
-use marker::*;
-use marker::geom::Rect;
 
+use self::geom::Rect;
+
+use marker::*;
 use ggez::graphics::Image;
 use ggez::graphics::spritebatch::*;
 

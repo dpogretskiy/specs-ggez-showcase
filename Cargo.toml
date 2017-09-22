@@ -6,15 +6,17 @@ build = "build.rs"
 
 [dependencies]
 rand = "0.3"
+serde = "*"
 serde_json = "*"
+serde_derive = "*"
 nalgebra = "0.13"
 specs = "*"
 specs-derive = "*"
 rayon = "0.7.1"
 
-[dependencies.tilesheet-marker]
-path = "../spritesheet-marker"
-version = "0.0.1"
+#[dependencies.tilesheet-marker]
+#path = "../spritesheet-marker"
+#version = "0.0.1"
 
 [dependencies.ggez]
 git = "https://github.com/ggez/ggez.git"

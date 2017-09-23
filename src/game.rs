@@ -19,12 +19,14 @@ use util::Vector2;
 
 pub struct Game<'a, 'b> {
     pub world: World,
+    pub player_count: usize,
     pub dispatcher: Dispatcher<'a, 'b>,
 }
 
 impl<'a, 'b> Game<'a, 'b> {
     pub fn new(ctx: &mut Context) -> GameResult<Game<'a, 'b>> {
         let mut world = World::new();
+        let mut pc = 0;
 
         world.register::<Position>();
         world.register::<MovingObject>();
@@ -94,7 +96,7 @@ impl<'a, 'b> Game<'a, 'b> {
         let fov = w as f64 * 1.5;
         world.add_resource(Camera::new(w, h, fov, hc * fov));
 
-        create_player(&mut world, true, Vector2::new(500.0, 500.0));
+        create_player(&mut world, &mut pc, true, Vector2::new(500.0, 500.0));
 
         let dispatcher: Dispatcher<'a, 'b> = DispatcherBuilder::new()
             .add(StartPSMSystem, "start-state-machines", &[])
@@ -122,7 +124,7 @@ impl<'a, 'b> Game<'a, 'b> {
             .add(ChaseCameraSystem, "chase_camera", &["position"])
             .build();
 
-        Ok(Game { world, dispatcher })
+        Ok(Game { world, player_count: pc, dispatcher })
     }
 }
 
@@ -230,7 +232,7 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn mouse_button_down_event(&mut self, button: event::MouseButton, x: i32, y: i32) {
         if button == event::MouseButton::Left {
             let p = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
-            create_player(&mut self.world, false, p);
+            create_player(&mut self.world, &mut self.player_count, false, p);
         }
     }
 
@@ -244,12 +246,12 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn mouse_wheel_event(&mut self, _: i32, _:i32) {
         let mp = self.world.read_resource::<MousePointer>().clone();
         let p = Vector2::new(mp.0, mp.1);
-        create_player(&mut self.world, false, p);
+        create_player(&mut self.world, &mut self.player_count, false, p);
     }
 }
 
 
-fn create_player(world: &mut World, snap_camera: bool, location: Vector2) {
+fn create_player(world: &mut World, pc: &mut usize, snap_camera: bool, location: Vector2) {
     let psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
 
     let pos = Position::new(location.x as f32, location.y as f32);
@@ -285,4 +287,7 @@ fn create_player(world: &mut World, snap_camera: bool, location: Vector2) {
     } else {
         e.build();
     }
+
+    *pc += 1;
+    println!("Players: {}", pc);
 }

@@ -13,7 +13,10 @@ impl AABB {
         let half_size = full_size / 2.0;
         let offset_y = (-half_size.y * (1.0 - scale.y)).round();
 
-        let scaled_hs = Vector2::new((half_size.x * scale.x).round(), (half_size.y * scale.y).round());
+        let scaled_hs = Vector2::new(
+            (half_size.x * scale.x).round(),
+            (half_size.y * scale.y).round(),
+        );
 
         AABB {
             half_size: scaled_hs,

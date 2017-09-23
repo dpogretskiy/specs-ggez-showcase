@@ -14,9 +14,7 @@ specs = "*"
 specs-derive = "*"
 rayon = "0.7.1"
 
-#[dependencies.tilesheet-marker]
-#path = "../spritesheet-marker"
-#version = "0.0.1"
+pushdown-automaton-macro = "*"
 
 [dependencies.ggez]
 git = "https://github.com/ggez/ggez.git"

@@ -25,8 +25,7 @@ use util::*;
 
 pub struct AABBMovingSystem;
 impl<'a> System<'a> for AABBMovingSystem {
-    type SystemData = (
-     WriteStorage<'a, HasAABB>,
+    type SystemData = (WriteStorage<'a, HasAABB>,
      WriteStorage<'a, MovingObject>,
      Fetch<'a, LevelTerrain>,
      Fetch<'a, DeltaTime>);
@@ -107,7 +106,7 @@ impl<'a> System<'a> for AABBMovingSystem {
     }
 }
 
-// pub struct CollisionSystem; 
+// pub struct CollisionSystem;
 // impl<'a> System<'a> for CollisionSystem {
 //     type SystemData = (WriteStorage<'a, MovingObject>, ReadStorage<'a, HasAABB>, ReadStorage<'a, CollisionDetection>, Fetch<'a, LevelTerrain>);
 

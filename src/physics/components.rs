@@ -116,7 +116,8 @@ impl HumanoidMovement {
                 } else if terrain.is_one_way_platform(tile_index_x, tile_index_y) &&
                            (checked_tile.y - *ground_y).abs() <=
                                (HumanoidMovement::PLATFORM_THRESHOLD + mv.old_position.y -
-                                   mv.position.y) {
+                                    mv.position.y)
+                {
                     bb.on_platform = true;
                 };
 

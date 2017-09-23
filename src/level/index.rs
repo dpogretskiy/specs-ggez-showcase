@@ -4,9 +4,9 @@ use super::LoadedAssets;
 
 use self::geom::Rect;
 
-use marker::*;
 use ggez::graphics::Image;
 use ggez::graphics::spritebatch::*;
+use marker::*;
 
 use rand;
 

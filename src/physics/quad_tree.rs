@@ -1,4 +1,3 @@
-
 use super::*;
 
 use std::borrow::BorrowMut;
@@ -47,24 +46,56 @@ where
 
         let level = self.level + 1;
 
-        self.nodes = Some(RefCell::new(Box::new([
-            QuadTree::create(level, Rect::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Rect::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Rect::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Rect::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ])));
-        self.nodes = Some(RefCell::new(Box::new([
-            QuadTree::create(level, Rect::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Rect::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Rect::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Rect::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ])));
+        self.nodes = Some(RefCell::new(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Rect::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        )));
+        self.nodes = Some(RefCell::new(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Rect::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Rect::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        )));
     }
 
     pub fn insert(&mut self, object: &'a T) {

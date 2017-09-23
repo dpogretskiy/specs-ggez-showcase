@@ -11,7 +11,7 @@ pub struct QuadTree {
     level: usize,
     bounds: Volume,
     objects: Vec<(Entity, Volume)>,
-    nodes: Option<RefCell<Box<[QuadTree; 4]>>>,
+    nodes: Option<Box<[QuadTree; 4]>>,
 }
 
 impl QuadTree {
@@ -41,31 +41,63 @@ impl QuadTree {
 
         let level = self.level + 1;
 
-        self.nodes = Some(RefCell::new(Box::new([
-            QuadTree::create(level, Volume::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Volume::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ])));
-        self.nodes = Some(RefCell::new(Box::new([
-            QuadTree::create(level, Volume::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Volume::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ])));
+        self.nodes = Some(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Volume::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        ));
+        self.nodes = Some(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Volume::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        ));
     }
 
     pub fn insert(&mut self, entity: Entity, rect: Volume) {
-        if let Some(ref nodes) = self.nodes {
+        if let Some(ref mut nodes) = self.nodes {
             let index = get_index(&self.bounds, &rect);
             if index != -1 {
-                nodes.borrow_mut()[index as usize].insert(entity, rect.clone());
+                (*nodes)[index as usize].insert(entity, rect.clone());
                 return;
             }
         }
@@ -81,8 +113,8 @@ impl QuadTree {
                 let ix = get_index(&self.bounds, &o.1);
 
                 if ix != -1 {
-                    if let Some(ref nodes) = self.nodes {
-                        nodes.borrow_mut()[ix as usize].insert(entity, rect);
+                    if let Some(ref mut nodes) = self.nodes {
+                        (*nodes)[ix as usize].insert(entity, rect);
                     }
                 }
             }
@@ -93,7 +125,7 @@ impl QuadTree {
         let ix = get_index(&self.bounds, &rect);
         if ix != -1 {
             if let Some(ref nodes) = self.nodes {
-                nodes.borrow()[ix as usize].retrieve_rec(ret, rect);
+                (*nodes)[ix as usize].retrieve_rec(ret, rect);
             }
         }
 
@@ -125,7 +157,7 @@ impl Volume {
 
     pub fn intersects(&self, other: &Volume) -> bool {
         !(self.x + self.w < other.x || other.x + other.w < self.x || self.y + self.h < other.y ||
-            other.y + other.h < self.y)
+              other.y + other.h < self.y)
     }
 }
 

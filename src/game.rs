@@ -124,7 +124,11 @@ impl<'a, 'b> Game<'a, 'b> {
             .add(ChaseCameraSystem, "chase_camera", &["position"])
             .build();
 
-        Ok(Game { world, player_count: pc, dispatcher })
+        Ok(Game {
+            world,
+            player_count: pc,
+            dispatcher,
+        })
     }
 }
 
@@ -236,14 +240,14 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
         }
     }
 
-    fn mouse_motion_event(&mut self, _state: MouseState, x: i32, y: i32, _:i32, _:i32) {
+    fn mouse_motion_event(&mut self, _state: MouseState, x: i32, y: i32, _: i32, _: i32) {
         let coords = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
         let mut mp = self.world.write_resource::<MousePointer>();
         mp.0 = coords.x;
         mp.1 = coords.y;
     }
 
-    fn mouse_wheel_event(&mut self, _: i32, _:i32) {
+    fn mouse_wheel_event(&mut self, _: i32, _: i32) {
         let mp = self.world.read_resource::<MousePointer>().clone();
         let p = Vector2::new(mp.0, mp.1);
         create_player(&mut self.world, &mut self.player_count, false, p);

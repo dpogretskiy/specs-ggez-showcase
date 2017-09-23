@@ -25,12 +25,10 @@ use util::*;
 
 pub struct AABBMovingSystem;
 impl<'a> System<'a> for AABBMovingSystem {
-    type SystemData = (
-        WriteStorage<'a, HasAABB>,
-        WriteStorage<'a, MovingObject>,
-        Fetch<'a, LevelTerrain>,
-        Fetch<'a, DeltaTime>,
-    );
+    type SystemData = (WriteStorage<'a, HasAABB>,
+     WriteStorage<'a, MovingObject>,
+     Fetch<'a, LevelTerrain>,
+     Fetch<'a, DeltaTime>);
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut has_aabb, mut mv, level, delta) = data;
@@ -57,7 +55,8 @@ impl<'a> System<'a> for AABBMovingSystem {
 
             bb.on_platform = false;
 
-            if mv.velocity.y <= 0.0 && HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
+            if mv.velocity.y <= 0.0 &&
+                HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
             {
                 mv.position.y = ground_y + bb.aabb.half_size.y - bb.aabb.offset.y;
                 mv.velocity.y = 0.0;
@@ -108,13 +107,11 @@ impl<'a> System<'a> for AABBMovingSystem {
 
 pub struct CollisionSystem;
 impl<'a> System<'a> for CollisionSystem {
-    type SystemData = (
-        Entities<'a>,
-        WriteStorage<'a, MovingObject>,
-        ReadStorage<'a, HasAABB>,
-        ReadStorage<'a, CollisionDetection>,
-        Fetch<'a, LevelTerrain>,
-    );
+    type SystemData = (Entities<'a>,
+     WriteStorage<'a, MovingObject>,
+     ReadStorage<'a, HasAABB>,
+     ReadStorage<'a, CollisionDetection>,
+     Fetch<'a, LevelTerrain>);
 
     fn run(&mut self, data: Self::SystemData) {
         use physics::quad_tree::*;
@@ -139,17 +136,21 @@ impl<'a> System<'a> for CollisionSystem {
             }
         }
 
-        for (e, mv, bb, _) in (&*e, &mut mv, &bb, &cd).join() {
+        let qt = qt;
+
+        (&*e, &mut mv, &bb, &cd).par_join().for_each(|(e, mv, bb, _)| {
             let vol = (&*mv, bb).to_rect();
 
             let iter = qt.retrieve(vol);
 
             for (ce, cv) in iter {
                 if vol.intersects(&cv) && e != ce {
-                    mv.velocity += Vector2::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5).normalize() * 100.0;
+                    mv.velocity +=
+                        Vector2::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5)
+                            .normalize() * 100.0;
                 }
             }
-        }
+        })
     }
 }
 

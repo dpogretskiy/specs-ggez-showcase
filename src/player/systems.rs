@@ -1,5 +1,6 @@
 use components::*;
 use player::consts as PC;
+use rayon::iter::ParallelIterator;
 use resources::*;
 use specs::*;
 
@@ -10,15 +11,17 @@ impl<'a> System<'a> for PlayerDirectionSystem {
      Fetch<'a, PlayerInput>);
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
-        for (mut dir, _) in (&mut directional, &controlled).join() {
-            if input.left ^ input.right {
+        (&mut directional, &controlled).par_join().for_each(
+            |(mut dir, _)| if input.left ^
+                input.right
+            {
                 if input.left {
                     *dir = Directional::Left;
                 } else {
                     *dir = Directional::Right;
                 }
-            }
-        }
+            },
+        );
     }
 }
 
@@ -40,19 +43,20 @@ impl<'a> System<'a> for PlayerUpdateSystem {
     fn run(&mut self, data: Self::SystemData) {
         let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        for (_, sm, mv, bb, anim, rend, dir) in
-            (
-                &controlled,
-                &mut sm,
-                &mut mv,
-                &mut bb,
-                &mut anim,
-                &mut rend,
-                &dir,
-            ).join()
-        {
-            sm.machine.update(mv, bb, anim, rend, dir, &*input, &*time);
-        }
+        (
+            &controlled,
+            &mut sm,
+            &mut mv,
+            &mut bb,
+            &mut anim,
+            &mut rend,
+            &dir,
+        ).par_join()
+            .for_each(|(_, sm, mv, bb, anim, rend, dir)| {
+                sm.machine.update(mv, bb, anim, rend, dir, &*input, &*time);
+            })
+
+
     }
 }
 
@@ -63,19 +67,18 @@ impl<'a> System<'a> for PlayerFixedUpdateSystem {
     fn run(&mut self, data: Self::SystemData) {
         let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        for (_, sm, mv, bb, anim, rend, dir) in
-            (
-                &controlled,
-                &mut sm,
-                &mut mv,
-                &mut bb,
-                &mut anim,
-                &mut rend,
-                &dir,
-            ).join()
-        {
-            sm.machine.fixed_update(mv, bb, anim, rend, dir, &*input, &*time);
-        }
+        (
+            &controlled,
+            &mut sm,
+            &mut mv,
+            &mut bb,
+            &mut anim,
+            &mut rend,
+            &dir,
+        ).par_join()
+            .for_each(|(_, sm, mv, bb, anim, rend, dir)| {
+                sm.machine.fixed_update(mv, bb, anim, rend, dir, &*input, &*time);
+            })
     }
 }
 
@@ -86,19 +89,18 @@ impl<'a> System<'a> for PlayerHandleEventsSystem {
     fn run(&mut self, data: Self::SystemData) {
         let (controlled, mut sm, mut mv, mut bb, mut anim, mut rend, dir, input, time) = data;
 
-        for (_, sm, mv, bb, anim, rend, dir) in
-            (
-                &controlled,
-                &mut sm,
-                &mut mv,
-                &mut bb,
-                &mut anim,
-                &mut rend,
-                &dir,
-            ).join()
-        {
-            sm.machine.handle_events(mv, bb, anim, rend, dir, &*input, &*time);
-        }
+        (
+            &controlled,
+            &mut sm,
+            &mut mv,
+            &mut bb,
+            &mut anim,
+            &mut rend,
+            &dir,
+        ).par_join()
+            .for_each(|(_, sm, mv, bb, anim, rend, dir)| {
+                sm.machine.handle_events(mv, bb, anim, rend, dir, &*input, &*time);
+            })
     }
 }
 
@@ -131,22 +133,21 @@ impl<'a> System<'a> for StartPSMSystem {
 
         let mut rem = vec![];
 
-        for (e, _, _, sm, mv, bb, anim, rend, dir) in
-            (
-                &*e,
-                &mut start,
-                &controlled,
-                &mut sm,
-                &mut mv,
-                &mut bb,
-                &mut anim,
-                &mut rend,
-                &dir,
-            ).join()
-        {
-            sm.machine.start(mv, bb, anim, rend, dir, &*input, &*time);
-            rem.push(e);
-        }
+        (
+            &*e,
+            &mut start,
+            &controlled,
+            &mut sm,
+            &mut mv,
+            &mut bb,
+            &mut anim,
+            &mut rend,
+            &dir,
+        ).join()
+            .for_each(|(e, _, _, sm, mv, bb, anim, rend, dir)| {
+                sm.machine.start(mv, bb, anim, rend, dir, &*input, &*time);
+                rem.push(e);
+            });
 
         for e in rem.iter() {
             start.remove(e.clone());

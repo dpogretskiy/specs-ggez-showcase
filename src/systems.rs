@@ -3,6 +3,7 @@ use camera::*;
 use components::*;
 use ggez::Context;
 use ggez::graphics::*;
+use rayon::iter::ParallelIterator;
 use specs::*;
 use std::collections::BTreeMap;
 use util::Vector2;
@@ -137,20 +138,17 @@ impl<'a> System<'a> for AnimationFFSystem {
     fn run(&mut self, data: Self::SystemData) {
         let (mut anim, mut rend) = data;
 
-        for (anim, rend) in (&mut anim, &mut rend).join() {
-            match rend.tpe {
-                RenderableType::Animation {
-                    ref id,
-                    ref mut frame,
-                    ref length,
-                } => {
-                    if let Some(next) = anim.sequence.next() {
-                        *frame = next;
-                    }
+        (&mut anim, &mut rend).par_join().for_each(|(anim, rend)| match rend.tpe {
+            RenderableType::Animation {
+                ref id,
+                ref mut frame,
+                ref length,
+            } => {
+                if let Some(next) = anim.sequence.next() {
+                    *frame = next;
                 }
-                _ => (),
             }
-
-        }
+            _ => (),
+        });
     }
 }

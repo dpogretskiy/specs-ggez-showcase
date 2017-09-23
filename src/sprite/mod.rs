@@ -2,7 +2,6 @@ use ggez::{Context, GameError, GameResult};
 use ggez::graphics::Image;
 use marker::*;
 use serde_json;
-use std::rc::Rc;
 
 
 pub mod animation;

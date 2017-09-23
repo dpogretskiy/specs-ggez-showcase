@@ -1,7 +1,5 @@
 pub mod geom;
 
-use super::sprite::*;
-
 #[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Clone, Debug)]
 pub enum Square {
     LT,

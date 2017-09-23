@@ -4,7 +4,6 @@ mod terrain;
 
 use ggez::{Context, GameResult};
 use ggez::graphics::Image;
-use std::rc::Rc;
 use util::Vector2;
 
 use marker::geom::*;
@@ -12,10 +11,8 @@ use sprite::MarkedTiles;
 
 use ggez::graphics;
 use ggez::graphics::DrawParam;
-use ggez::graphics::Drawable;
 use ggez::graphics::spritebatch::*;
 
-use self::index::*;
 use marker::{Horizontal, Square};
 
 pub use self::loaded::*;
@@ -1110,7 +1107,7 @@ impl RenderableLevel {
         }
 
         let mut g_batch = SpriteBatch::new(assets.ground.image);
-        let mut o_batch = SpriteBatch::new(assets.objects.image);
+        let o_batch = SpriteBatch::new(assets.objects.image);
         let bg = assets.background;
 
 

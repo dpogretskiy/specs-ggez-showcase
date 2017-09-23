@@ -40,3 +40,6 @@ impl PlayerInput {
         self.jump = false;
     }
 }
+
+#[derive(Clone)]
+pub struct MousePointer(pub f64, pub f64);

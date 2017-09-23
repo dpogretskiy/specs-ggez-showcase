@@ -38,6 +38,7 @@ impl<'a, 'b> Game<'a, 'b> {
         world.register::<SnapCamera>();
         world.register::<StartPSM>();
         world.register::<ChaseCamera>();
+        world.register::<CollisionDetection>();
 
         //load everything!
         {
@@ -56,6 +57,7 @@ impl<'a, 'b> Game<'a, 'b> {
                 asset_storage.batches.insert("level-ground", ground_batch);
                 asset_storage.batches.insert("level-objects", objects_batch);
                 world.add_resource(LevelTerrain { terrain });
+                world.add_resource(MousePointer(0.0, 0.0));
             }
             //player part
             {
@@ -115,6 +117,7 @@ impl<'a, 'b> Game<'a, 'b> {
                 "p.reset_input",
                 &["p.handle_events"],
             )
+            .add(CollisionSystem, "collisions", &["has_aabb"])
             .add(CameraSnapSystem, "camera_snap", &["position"])
             .add(ChaseCameraSystem, "chase_camera", &["position"])
             .build();
@@ -228,17 +231,20 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
         if button == event::MouseButton::Left {
             let p = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
             create_player(&mut self.world, false, p);
-
-
-            // let rect = graphics::Rect::new(0.0, 0.41133004, 0.25728154, 0.26108375);
-            // let rect = graphics::Rect::new(0.0, 0.0, 1.0, 1.0);
-
-            // self.boxes.push(GameBox::new(
-            //     p,
-            //     &self.level.objects.image,
-            //     rect,
-            // ));
         }
+    }
+
+    fn mouse_motion_event(&mut self, _state: MouseState, x: i32, y: i32, _:i32, _:i32) {
+        let coords = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
+        let mut mp = self.world.write_resource::<MousePointer>();
+        mp.0 = coords.x;
+        mp.1 = coords.y;
+    }
+
+    fn mouse_wheel_event(&mut self, _: i32, _:i32) {
+        let mp = self.world.read_resource::<MousePointer>().clone();
+        let p = Vector2::new(mp.0, mp.1);
+        create_player(&mut self.world, false, p);
     }
 }
 
@@ -271,7 +277,8 @@ fn create_player(world: &mut World, snap_camera: bool, location: Vector2) {
         .with(HasAABB::new(AABB::new_full(
             Vector2::new(290.0, 500.0) * player_scale,
             Vector2::new(0.7, 0.8),
-        )));
+        )))
+        .with(CollisionDetection { group: 0 });
 
     if snap_camera {
         e.with(SnapCamera).build();

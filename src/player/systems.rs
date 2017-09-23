@@ -1,9 +1,7 @@
 use components::*;
 use player::consts as PC;
-use rendering::animation_seq::*;
 use resources::*;
 use specs::*;
-use std::rc::Rc;
 
 pub struct PlayerDirectionSystem;
 impl<'a> System<'a> for PlayerDirectionSystem {

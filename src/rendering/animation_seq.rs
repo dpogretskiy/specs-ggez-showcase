@@ -1,5 +1,4 @@
 use specs::*;
-use std::iter;
 
 #[derive(Clone)]
 pub struct HasAnimationSequence {

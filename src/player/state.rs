@@ -4,7 +4,6 @@ use player::animation_defs::*;
 use player::consts as PC;
 use player::state_machine::*;
 use player::systems::PlayerAux;
-use rendering::animation_seq::*;
 use resources::*;
 use util::seconds;
 

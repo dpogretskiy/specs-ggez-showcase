@@ -33,8 +33,8 @@ impl RenderableType {
         match self {
             &mut RenderableType::Animation {
                 ref mut id,
-                ref frame,
                 ref mut length,
+                ..
             } => {
                 *id = new_id;
                 *length = new_length;

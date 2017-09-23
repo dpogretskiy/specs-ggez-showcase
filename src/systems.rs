@@ -3,7 +3,6 @@ use camera::*;
 use components::*;
 use ggez::Context;
 use ggez::graphics::*;
-use rendering::animation_seq::*;
 use specs::*;
 use std::collections::BTreeMap;
 use util::Vector2;

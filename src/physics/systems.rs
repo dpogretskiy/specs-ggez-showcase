@@ -25,10 +25,12 @@ use util::*;
 
 pub struct AABBMovingSystem;
 impl<'a> System<'a> for AABBMovingSystem {
-    type SystemData = (WriteStorage<'a, HasAABB>,
-     WriteStorage<'a, MovingObject>,
-     Fetch<'a, LevelTerrain>,
-     Fetch<'a, DeltaTime>);
+    type SystemData = (
+        WriteStorage<'a, HasAABB>,
+        WriteStorage<'a, MovingObject>,
+        Fetch<'a, LevelTerrain>,
+        Fetch<'a, DeltaTime>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut has_aabb, mut mv, level, delta) = data;
@@ -36,7 +38,6 @@ impl<'a> System<'a> for AABBMovingSystem {
         let delta = seconds(&delta.time);
 
         (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
-
             mv.old_position = mv.position;
             mv.old_velocity = mv.velocity;
             mv.old_accel = mv.accel;
@@ -56,8 +57,7 @@ impl<'a> System<'a> for AABBMovingSystem {
 
             bb.on_platform = false;
 
-            if mv.velocity.y <= 0.0 &&
-                HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
+            if mv.velocity.y <= 0.0 && HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
             {
                 mv.position.y = ground_y + bb.aabb.half_size.y - bb.aabb.offset.y;
                 mv.velocity.y = 0.0;
@@ -106,32 +106,52 @@ impl<'a> System<'a> for AABBMovingSystem {
     }
 }
 
-// pub struct CollisionSystem;
-// impl<'a> System<'a> for CollisionSystem {
-//     type SystemData = (WriteStorage<'a, MovingObject>, ReadStorage<'a, HasAABB>, ReadStorage<'a, CollisionDetection>, Fetch<'a, LevelTerrain>);
+pub struct CollisionSystem;
+impl<'a> System<'a> for CollisionSystem {
+    type SystemData = (
+        Entities<'a>,
+        WriteStorage<'a, MovingObject>,
+        ReadStorage<'a, HasAABB>,
+        ReadStorage<'a, CollisionDetection>,
+        Fetch<'a, LevelTerrain>,
+    );
 
-//     fn run(&mut self, data: Self::SystemData) {
-//         use physics::quad_tree::*;
+    fn run(&mut self, data: Self::SystemData) {
+        use physics::quad_tree::*;
+        use rand;
 
-//         let (mv, bb, cd, t) = data;
+        let (e, mut mv, bb, cd, t) = data;
 
-//         let terrain_rect = {
-//             let x = t.terrain.position.x;
-//             let y = t.terrain.position.y;
-//             let w = t.terrain.width as f64 * t.terrain.tile_size;
-//             let h = t.terrain.height as f64 * t.terrain.tile_size;
-//             Rect::new(x, y, w, h)
-//         };
+        let terrain_rect = {
+            let x = t.terrain.position.x;
+            let y = t.terrain.position.y;
+            let w = t.terrain.width as f64 * t.terrain.tile_size;
+            let h = t.terrain.height as f64 * t.terrain.tile_size;
+            Volume::new(x, y, w, h)
+        };
 
-//         let mut qt = QuadTree::new(terrain_rect);
+        let mut qt = QuadTree::new(terrain_rect);
 
-//         for (mv, bb, _) in (&mv, &bb, &cd).join() {
-//             let tup = (mv, bb);
+        {
+            for (e, mv, bb, _) in (&*e, &mv, &bb, &cd).join() {
+                let rect = (mv, bb).to_rect();
+                qt.insert(e.clone(), rect);
+            }
+        }
 
-//             qt.insert(&tup);
-//         }
-//     }
-// }
+        for (e, mv, bb, _) in (&*e, &mut mv, &bb, &cd).join() {
+            let vol = (&*mv, bb).to_rect();
+
+            let iter = qt.retrieve(vol);
+
+            for (ce, cv) in iter {
+                if vol.intersects(&cv) && e != ce {
+                    mv.velocity += Vector2::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5).normalize() * 100.0;
+                }
+            }
+        }
+    }
+}
 
 pub struct PositionSystem;
 

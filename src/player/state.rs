@@ -250,9 +250,9 @@ impl State for Jumping {
         _rend: &mut Renderable,
         _dir: &Directional,
         pi: &PlayerInput,
-        delta: &DeltaTime,
+        time: &DeltaTime,
     ) -> Trans {
-        let y_vel = PC::GRAVITY * seconds(&delta.time) + mv.velocity.y;
+        let y_vel = PC::GRAVITY * time.delta + mv.velocity.y;
         mv.velocity.y = y_vel.max(PC::MAX_FALLING_SPEED);
         // let gl = player.lg.grab_ledge(&mut mv, &pi, terrain);
 

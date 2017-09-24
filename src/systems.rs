@@ -3,9 +3,11 @@ use camera::*;
 use components::*;
 use ggez::Context;
 use ggez::graphics::*;
+use ggez::graphics::spritebatch::SpriteBatch;
 use rayon::iter::ParallelIterator;
 use specs::*;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use util::Vector2;
 
 pub use physics::systems::*;
@@ -22,16 +24,18 @@ impl<'c> RenderingSystem<'c> {
 }
 
 impl<'a, 'c> System<'a> for RenderingSystem<'c> {
-    type SystemData = (Entities<'a>,
-     Fetch<'a, AssetStorage>,
-     Fetch<'a, Camera>,
-     ReadStorage<'a, Renderable>,
-     ReadStorage<'a, Position>,
-     ReadStorage<'a, Scalable>,
-     ReadStorage<'a, Directional>);
+    type SystemData = (
+        Entities<'a>,
+        FetchMut<'a, AssetStorage>,
+        Fetch<'a, Camera>,
+        ReadStorage<'a, Renderable>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Scalable>,
+        ReadStorage<'a, Directional>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, assets, camera, renderable, position, scalable, directional) = data;
+        let (entities, mut assets, camera, renderable, position, scalable, directional) = data;
 
         let default_scale = Scalable::new(1.0, 1.0);
 
@@ -54,58 +58,78 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
             for (rt, pos, scale) in data.into_iter() {
                 match rt {
                     RenderableType::Animation { id, frame, length } => {
-                        if let Some(a) = assets.animations.get(id) {
+                        if let Some(ref mut batch) = assets.animations.get_mut(id) {
                             if frame < length {
-                                let i = &a.image;
-                                let frame = a.frames[frame];
-                                i.draw_ex_camera(
-                                    &*camera,
-                                    self.ctx,
-                                    DrawParam {
-                                        dest: Point2::new(pos.x, pos.y),
-                                        src: frame,
-                                        scale: Point2::new(scale.x, scale.y),
-                                        ..Default::default()
-                                    },
-                                ).unwrap();
+                                let frame = batch.frames[frame];
+                                let mut dp = DrawParam {
+                                    dest: Point2::new(pos.x, pos.y),
+                                    src: frame,
+                                    scale: Point2::new(scale.x, scale.y),
+                                    ..Default::default()
+                                };
+
+                                let dest = Vector2::new(dp.dest.x as f64, dp.dest.y as f64);
+                                let dest = camera.calculate_dest_point(dest);
+                                let scale = camera.draw_scale();
+                                let orig_scale = dp.scale.clone();
+                                let mut my_p = dp;
+                                my_p.dest = dest;
+                                my_p.scale =
+                                    Point2::new(orig_scale.x * scale.x, orig_scale.y * scale.y);
+                                batch.batch.add(my_p);
                             }
                         }
                     }
-                    RenderableType::Image { id } => {
-                        if let Some(i) = assets.images.get(id) {
-                            i.draw_ex_camera(
-                                &*camera,
-                                self.ctx,
-                                DrawParam {
-                                    dest: Point2::new(pos.x, pos.y),
-                                    scale: Point2::new(scale.x, scale.y),
-                                    ..Default::default()
-                                },
-                            ).unwrap();
-                        }
-                    }
-                    RenderableType::Batch { id } => {
-                        if let Some(b) = assets.batches.get(id) {
-                            b.draw_ex_camera(
-                                &*camera,
-                                self.ctx,
-                                DrawParam {
-                                    dest: Point2::new(pos.x, pos.y),
-                                    scale: Point2::new(scale.x, scale.y),
-                                    ..Default::default()
-                                },
-                            ).unwrap();
-                        }
-                    }
+                    RenderableType::Image { id } => if let Some(i) = assets.images.get(id) {
+                        i.draw_ex_camera(
+                            &*camera,
+                            self.ctx,
+                            DrawParam {
+                                dest: Point2::new(pos.x, pos.y),
+                                scale: Point2::new(scale.x, scale.y),
+                                ..Default::default()
+                            },
+                        ).unwrap();
+                    },
+                    RenderableType::Batch { id } => if let Some(b) = assets.batches.get(id) {
+                        b.draw_ex_camera(
+                            &*camera,
+                            self.ctx,
+                            DrawParam {
+                                dest: Point2::new(pos.x, pos.y),
+                                scale: Point2::new(scale.x, scale.y),
+                                ..Default::default()
+                            },
+                        ).unwrap();
+                    },
                 }
             }
+        }
+
+        for (_, batch) in assets.animations.iter_mut() {
+            batch
+                .batch
+                .draw_ex(
+                    self.ctx,
+                    DrawParam {
+                        dest: Point2::new(0.0, 0.0),
+                        scale: Point2::new(1.0, 1.0),
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+            batch.batch.clear();
         }
     }
 }
 
 pub struct CameraSnapSystem;
 impl<'a> System<'a> for CameraSnapSystem {
-    type SystemData = (FetchMut<'a, Camera>, ReadStorage<'a, Position>, ReadStorage<'a, SnapCamera>);
+    type SystemData = (
+        FetchMut<'a, Camera>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, SnapCamera>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut camera, position, snap) = data;
@@ -118,7 +142,11 @@ impl<'a> System<'a> for CameraSnapSystem {
 
 pub struct ChaseCameraSystem;
 impl<'a> System<'a> for ChaseCameraSystem {
-    type SystemData = (Fetch<'a, Camera>, ReadStorage<'a, ChaseCamera>, WriteStorage<'a, Position>);
+    type SystemData = (
+        Fetch<'a, Camera>,
+        ReadStorage<'a, ChaseCamera>,
+        WriteStorage<'a, Position>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (cam, chase, mut pos) = data;
@@ -133,7 +161,10 @@ impl<'a> System<'a> for ChaseCameraSystem {
 
 pub struct AnimationFFSystem;
 impl<'a> System<'a> for AnimationFFSystem {
-    type SystemData = (WriteStorage<'a, HasAnimationSequence>, WriteStorage<'a, Renderable>);
+    type SystemData = (
+        WriteStorage<'a, HasAnimationSequence>,
+        WriteStorage<'a, Renderable>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut anim, mut rend) = data;
@@ -143,11 +174,9 @@ impl<'a> System<'a> for AnimationFFSystem {
                 ref id,
                 ref mut frame,
                 ref length,
-            } => {
-                if let Some(next) = anim.sequence.next() {
-                    *frame = next;
-                }
-            }
+            } => if let Some(next) = anim.sequence.next() {
+                *frame = next;
+            },
             _ => (),
         });
     }

@@ -14,8 +14,7 @@ use systems::*;
 use physics::AABB;
 use player::animation_defs::PlayerAnimations;
 
-
-use util::Vector2;
+use util::{Vector2, seconds};
 
 pub struct Game<'a, 'b> {
     pub world: World,
@@ -88,7 +87,7 @@ impl<'a, 'b> Game<'a, 'b> {
             .with(ChaseCamera)
             .build();
 
-        world.add_resource(DeltaTime { time: Duration::from_secs(0) });
+        world.add_resource(DeltaTime { delta: 0.0 });
         world.add_resource(PlayerInput::new());
 
         let (w, h) = (ctx.conf.window_width, ctx.conf.window_height);
@@ -139,7 +138,7 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
             println!("FPS: {}", timer::get_fps(ctx));
         }
 
-        self.world.write_resource::<DeltaTime>().time = dt;
+        self.world.write_resource::<DeltaTime>().delta = seconds(&dt);
 
         if timer::check_update_time(ctx, 30) {
             PlayerFixedUpdateSystem.run_now(&mut self.world.res);

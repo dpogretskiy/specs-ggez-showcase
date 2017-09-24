@@ -1,9 +1,8 @@
 use level::*;
-use std::time::Duration;
 
 #[derive(Clone)]
 pub struct DeltaTime {
-    pub time: Duration,
+    pub delta: f64,
 }
 
 pub struct LevelTerrain {

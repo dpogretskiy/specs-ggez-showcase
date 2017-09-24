@@ -25,15 +25,17 @@ use util::*;
 
 pub struct AABBMovingSystem;
 impl<'a> System<'a> for AABBMovingSystem {
-    type SystemData = (WriteStorage<'a, HasAABB>,
-     WriteStorage<'a, MovingObject>,
-     Fetch<'a, LevelTerrain>,
-     Fetch<'a, DeltaTime>);
+    type SystemData = (
+        WriteStorage<'a, HasAABB>,
+        WriteStorage<'a, MovingObject>,
+        Fetch<'a, LevelTerrain>,
+        Fetch<'a, DeltaTime>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut has_aabb, mut mv, level, delta) = data;
+        let (mut has_aabb, mut mv, level, time) = data;
         let terrain = &level.terrain;
-        let delta = seconds(&delta.time);
+        let delta = time.delta;
 
         (&mut has_aabb, &mut mv).par_join().for_each(|(bb, mv)| {
             mv.old_position = mv.position;
@@ -55,8 +57,7 @@ impl<'a> System<'a> for AABBMovingSystem {
 
             bb.on_platform = false;
 
-            if mv.velocity.y <= 0.0 &&
-                HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
+            if mv.velocity.y <= 0.0 && HumanoidMovement::has_ground(mv, bb, &mut ground_y, terrain)
             {
                 mv.position.y = ground_y + bb.aabb.half_size.y - bb.aabb.offset.y;
                 mv.velocity.y = 0.0;
@@ -107,17 +108,21 @@ impl<'a> System<'a> for AABBMovingSystem {
 
 pub struct CollisionSystem;
 impl<'a> System<'a> for CollisionSystem {
-    type SystemData = (Entities<'a>,
-     WriteStorage<'a, MovingObject>,
-     ReadStorage<'a, HasAABB>,
-     ReadStorage<'a, CollisionDetection>,
-     Fetch<'a, LevelTerrain>);
+    type SystemData = (
+        Entities<'a>,
+        WriteStorage<'a, MovingObject>,
+        ReadStorage<'a, HasAABB>,
+        ReadStorage<'a, CollisionDetection>,
+        Fetch<'a, LevelTerrain>,
+        Fetch<'a, DeltaTime>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         use physics::quad_tree::*;
         use rand;
+        use std;
 
-        let (e, mut mv, bb, cd, t) = data;
+        let (e, mut mv, bb, cd, t, time) = data;
 
         let terrain_rect = {
             let x = t.terrain.position.x;
@@ -145,9 +150,26 @@ impl<'a> System<'a> for CollisionSystem {
 
             for (ce, cv) in iter {
                 if vol.intersects(&cv) && e != ce {
-                    mv.velocity +=
-                        Vector2::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5)
-                            .normalize() * 100.0;
+                    let center = mv.position + bb.aabb.offset;
+                    let o_center = cv.center();
+
+                    let dir = (center - o_center).normalize();
+                    // println!("Direction: {:?}", dir);
+                    // println!("New velo: {:?}", mv.velocity - dir * time.delta);
+                    let force = 10000.0 * time.delta;
+
+                    let velo_delta = dir * force;
+                    if velo_delta.x.is_nan() || velo_delta.x.abs() > 5000.0 ||
+                        velo_delta.x.abs() < 1.0 || velo_delta.y.is_nan() ||
+                        velo_delta.y.abs() < 5.0 ||
+                        velo_delta.y.abs() > 5000.0
+                    {
+                        mv.velocity +=
+                            Vector2::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5)
+                                .normalize() * force;
+                    } else {
+                        mv.velocity -= velo_delta;
+                    }
                 }
             }
         })

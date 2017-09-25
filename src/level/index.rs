@@ -29,6 +29,7 @@ pub struct LevelAssetIndex {
     objects: ObjectIndex,
 }
 
+#[allow(dead_code)]
 impl LevelAssetIndex {
     pub fn build(loaded: &LoadedAssets) -> LevelAssetIndex {
         let mut ground_sqr: HashMap<Square, Vec<Rect>> = HashMap::new();

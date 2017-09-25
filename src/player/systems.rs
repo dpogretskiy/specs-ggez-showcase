@@ -12,7 +12,7 @@ impl<'a> System<'a> for PlayerDirectionSystem {
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
         (&mut directional, &controlled).par_join().for_each(
-            |(mut dir, _)| if input.left ^
+            |(dir, _)| if input.left ^
                 input.right
             {
                 if input.left {

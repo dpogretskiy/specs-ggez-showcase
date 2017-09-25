@@ -120,7 +120,6 @@ impl<'a> System<'a> for CollisionSystem {
     fn run(&mut self, data: Self::SystemData) {
         use physics::quad_tree::*;
         use rand;
-        use std;
 
         let (e, mut mv, bb, cd, t, time) = data;
 

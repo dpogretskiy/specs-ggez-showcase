@@ -9,6 +9,7 @@ pub struct Terrain {
     pub tile_size: f64,
 }
 
+#[allow(dead_code)]
 impl Terrain {
     pub fn get_tile_at_point(&self, point: Vector2) -> na::Vector2<isize> {
         na::Vector2::new(

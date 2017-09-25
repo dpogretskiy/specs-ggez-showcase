@@ -114,7 +114,7 @@ impl Iterator for AnimationSequence {
 
 fn next_frame(opt: &mut Option<Box<AnimationSequence>>) -> Option<usize> {
     let mut res = None;
-    for mut iter in opt.iter_mut() {
+    for iter in opt.iter_mut() {
         for ret in iter.next().iter() {
             res = Some(*ret)
         }
@@ -132,18 +132,18 @@ impl AnimationSequence {
         }
     }
 
-    pub fn reset(&mut self) {
-        self.current = self.animation.clone();
-    }
+    // pub fn reset(&mut self) {
+    //     self.current = self.animation.clone();
+    // }
 
-    pub fn cycle(&mut self) -> usize {
-        if let Some(fr) = self.next() {
-            return fr;
-        } else {
-            self.reset();
-            self.cycle()
-        }
-    }
+    // pub fn cycle(&mut self) -> usize {
+    //     if let Some(fr) = self.next() {
+    //         return fr;
+    //     } else {
+    //         self.reset();
+    //         self.cycle()
+    //     }
+    // }
 
     pub fn is_over(&mut self) -> bool {
         self.peekable().peek().is_none()

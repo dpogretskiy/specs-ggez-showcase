@@ -3,11 +3,9 @@ use camera::*;
 use components::*;
 use ggez::Context;
 use ggez::graphics::*;
-use ggez::graphics::spritebatch::SpriteBatch;
 use rayon::iter::ParallelIterator;
 use specs::*;
 use std::collections::BTreeMap;
-use std::collections::HashMap;
 use util::Vector2;
 
 pub use physics::systems::*;
@@ -61,7 +59,7 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
                         if let Some(ref mut batch) = assets.animations.get_mut(id) {
                             if frame < length {
                                 let frame = batch.frames[frame];
-                                let mut dp = DrawParam {
+                                let dp = DrawParam {
                                     dest: Point2::new(pos.x, pos.y),
                                     src: frame,
                                     scale: Point2::new(scale.x, scale.y),
@@ -170,13 +168,11 @@ impl<'a> System<'a> for AnimationFFSystem {
         let (mut anim, mut rend) = data;
 
         (&mut anim, &mut rend).par_join().for_each(|(anim, rend)| match rend.tpe {
-            RenderableType::Animation {
-                ref id,
-                ref mut frame,
-                ref length,
-            } => if let Some(next) = anim.sequence.next() {
-                *frame = next;
-            },
+            RenderableType::Animation { ref mut frame, .. } => {
+                if let Some(next) = anim.sequence.next() {
+                    *frame = next;
+                }
+            }
             _ => (),
         });
     }

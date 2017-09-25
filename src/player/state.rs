@@ -5,20 +5,19 @@ use player::consts as PC;
 use player::state_machine::*;
 use player::systems::PlayerAux;
 use resources::*;
-use util::seconds;
 
 pub struct Idle;
 
 impl State for Idle {
     fn on_start(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
         rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::idle();
         rend.tpe.set_animation_id(player::P_IDLE, 10);
@@ -43,10 +42,10 @@ impl State for Idle {
         mv: &mut MovingObject,
         bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
+        _rend: &mut Renderable,
+        _dir: &Directional,
         pi: &PlayerInput,
-        delta: &DeltaTime,
+        _delta: &DeltaTime,
     ) -> Trans {
         let trans = if !bb.on_ground {
             anim.sequence = PlayerAnimations::drop();
@@ -73,12 +72,12 @@ impl State for Idle {
     fn update(
         &mut self,
         mv: &mut MovingObject,
-        bb: &mut HasAABB,
-        anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         PlayerAux::slow_down(&mut *mv, true);
         Trans::None
@@ -90,13 +89,13 @@ pub struct Running;
 impl State for Running {
     fn on_start(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
         rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::run();
         rend.tpe.set_animation_id(player::P_RUN, 10);
@@ -121,10 +120,10 @@ impl State for Running {
         mv: &mut MovingObject,
         bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
+        _rend: &mut Renderable,
+        _dir: &Directional,
         pi: &PlayerInput,
-        delta: &DeltaTime,
+        _delta: &DeltaTime,
     ) -> Trans {
         if !(pi.left ^ pi.right) {
             return Trans::Switch(Box::new(Idle));
@@ -155,11 +154,11 @@ impl State for Running {
         &mut self,
         mv: &mut MovingObject,
         bb: &mut HasAABB,
-        anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
         dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         PlayerAux::movement(&mut *mv, &mut *bb, &dir);
         Trans::None
@@ -297,13 +296,13 @@ pub struct Sliding;
 impl State for Sliding {
     fn on_start(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
         rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::slide();
         rend.tpe.set_animation_id(player::P_SLIDE, 10);
@@ -311,13 +310,13 @@ impl State for Sliding {
 
     fn handle_events(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
+        _rend: &mut Renderable,
+        _dir: &Directional,
         pi: &PlayerInput,
-        delta: &DeltaTime,
+        _delta: &DeltaTime,
     ) -> Trans {
         let trans = if pi.jump {
             anim.sequence = PlayerAnimations::jump();
@@ -330,26 +329,26 @@ impl State for Sliding {
 
     fn update(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
-        anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         Trans::None
     }
 
     fn fixed_update(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         if anim.sequence.is_over() {
             Trans::Pop
@@ -370,13 +369,13 @@ pub struct Attacking;
 impl State for Attacking {
     fn on_start(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
         rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) {
         rend.tpe.set_animation_id(player::P_ATTACK, 10);
         anim.sequence = PlayerAnimations::attack();
@@ -384,13 +383,13 @@ impl State for Attacking {
 
     fn handle_events(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
-        anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         // let t = if self.can_cancel(player) {
         //     if pi.jump {
@@ -411,13 +410,13 @@ impl State for Attacking {
 
     fn fixed_update(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
         anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         if anim.sequence.is_over() {
             Trans::Pop
@@ -428,13 +427,13 @@ impl State for Attacking {
 
     fn update(
         &mut self,
-        mv: &mut MovingObject,
-        bb: &mut HasAABB,
-        anim: &mut HasAnimationSequence,
-        rend: &mut Renderable,
-        dir: &Directional,
-        pi: &PlayerInput,
-        delta: &DeltaTime,
+        _mv: &mut MovingObject,
+        _bb: &mut HasAABB,
+        _anim: &mut HasAnimationSequence,
+        _rend: &mut Renderable,
+        _dir: &Directional,
+        _pi: &PlayerInput,
+        _delta: &DeltaTime,
     ) -> Trans {
         Trans::None
     }

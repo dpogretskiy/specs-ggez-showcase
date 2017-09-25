@@ -1,6 +1,6 @@
 use super::MarkedTiles;
 
-use ggez::graphics::{Image, Rect};
+use ggez::graphics::Rect;
 use ggez::graphics::spritebatch::SpriteBatch;
 
 pub struct Animation {

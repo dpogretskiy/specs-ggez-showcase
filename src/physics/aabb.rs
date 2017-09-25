@@ -35,7 +35,6 @@ impl AABB {
             Sensor::BottomRight => {
                 at + Vector2::new(self.half_size.x, -self.half_size.y) + self.offset
             }
-            Sensor::TopLeft => at + Vector2::new(-self.half_size.x, self.half_size.y) + self.offset,
             Sensor::TopRight => at + self.half_size + self.offset,
         };
 
@@ -48,7 +47,6 @@ impl AABB {
 }
 
 pub enum Sensor {
-    TopLeft,
     BottomLeft,
     TopRight,
     BottomRight,

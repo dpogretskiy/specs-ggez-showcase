@@ -16,7 +16,16 @@ state_machine!(
 #[allow(dead_code)]
 struct Dead;
 impl State for Dead {
-    fn update(&mut self, _: &mut MovingObject, _: &mut HasAABB, _: &mut HasAnimationSequence, _: &mut Renderable, _: &Directional, _: &PlayerInput, _: &DeltaTime) -> Trans {
+    fn update(
+        &mut self,
+        _: &mut MovingObject,
+        _: &mut HasAABB,
+        _: &mut HasAnimationSequence,
+        _: &mut Renderable,
+        _: &Directional,
+        _: &PlayerInput,
+        _: &DeltaTime,
+    ) -> Trans {
         Trans::Quit
     }
 }

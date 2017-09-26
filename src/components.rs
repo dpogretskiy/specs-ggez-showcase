@@ -82,3 +82,19 @@ impl Scalable {
         Scalable { x, y }
     }
 }
+
+pub fn register_components(world: &mut World) {
+    world.register::<Position>();
+    world.register::<MovingObject>();
+    world.register::<HasAABB>();
+    world.register::<Renderable>();
+    world.register::<Scalable>();
+    world.register::<Directional>();
+    world.register::<HasAnimationSequence>();
+    world.register::<PlayerStateMachine>();
+    world.register::<Controlled>();
+    world.register::<SnapCamera>();
+    world.register::<StartPSM>();
+    world.register::<ChaseCamera>();
+    world.register::<CollisionDetection>();
+}

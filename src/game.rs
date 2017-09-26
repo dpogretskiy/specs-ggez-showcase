@@ -11,9 +11,6 @@ use specs::*;
 use std::time::Duration;
 use systems::*;
 
-use physics::AABB;
-use player::animation_defs::PlayerAnimations;
-
 use util::{Vector2, seconds};
 
 pub struct Game<'a, 'b> {
@@ -26,20 +23,7 @@ impl<'a, 'b> Game<'a, 'b> {
     pub fn new(ctx: &mut Context) -> GameResult<Game<'a, 'b>> {
         let mut world = World::new();
         let mut pc = 0;
-
-        world.register::<Position>();
-        world.register::<MovingObject>();
-        world.register::<HasAABB>();
-        world.register::<Renderable>();
-        world.register::<Scalable>();
-        world.register::<Directional>();
-        world.register::<HasAnimationSequence>();
-        world.register::<PlayerStateMachine>();
-        world.register::<Controlled>();
-        world.register::<SnapCamera>();
-        world.register::<StartPSM>();
-        world.register::<ChaseCamera>();
-        world.register::<CollisionDetection>();
+        register_components(&mut world);
 
         //load everything!
         {
@@ -58,11 +42,10 @@ impl<'a, 'b> Game<'a, 'b> {
                 asset_storage.batches.insert("level-ground", ground_batch);
                 asset_storage.batches.insert("level-objects", objects_batch);
                 world.add_resource(LevelTerrain { terrain });
-                world.add_resource(MousePointer(0.0, 0.0));
             }
             //player part
             {
-                PlayerLoader::load_assets(ctx, &mut asset_storage)?;
+                AnimationLoader::load_assets(ctx, &mut asset_storage)?;
             }
             world.add_resource::<AssetStorage>(asset_storage);
         }
@@ -87,15 +70,17 @@ impl<'a, 'b> Game<'a, 'b> {
             .with(ChaseCamera)
             .build();
 
+        world.add_resource(MousePointer(0.0, 0.0));
         world.add_resource(DeltaTime { delta: 0.0 });
         world.add_resource(PlayerInput::new());
 
         let (w, h) = (ctx.conf.window_width, ctx.conf.window_height);
         let hc = h as f64 / w as f64;
         let fov = w as f64 * 1.5;
+
         world.add_resource(Camera::new(w, h, fov, hc * fov));
 
-        create_player(&mut world, &mut pc, true, Vector2::new(500.0, 500.0));
+        Player::spawn(&mut world, Vector2::new(500.0, 500.0), true, true, &mut pc);
 
         let dispatcher: Dispatcher<'a, 'b> = DispatcherBuilder::new()
             .add(StartPSMSystem, "start-state-machines", &[])
@@ -133,7 +118,6 @@ impl<'a, 'b> Game<'a, 'b> {
 
 impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
-
         if timer::get_ticks(ctx) % 100 == 0 {
             println!("FPS: {}", timer::get_fps(ctx));
         }
@@ -235,7 +219,7 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn mouse_button_down_event(&mut self, button: event::MouseButton, x: i32, y: i32) {
         if button == event::MouseButton::Left {
             let p = self.world.read_resource::<Camera>().screen_to_world_coords((x, y));
-            create_player(&mut self.world, &mut self.player_count, false, p);
+            Player::spawn(&mut self.world, p, false, false, &mut self.player_count)
         }
     }
 
@@ -249,48 +233,6 @@ impl<'a, 'b> event::EventHandler for Game<'a, 'b> {
     fn mouse_wheel_event(&mut self, _: i32, _: i32) {
         let mp = self.world.read_resource::<MousePointer>().clone();
         let p = Vector2::new(mp.0, mp.1);
-        create_player(&mut self.world, &mut self.player_count, false, p);
+        Player::spawn(&mut self.world, p, false, false, &mut self.player_count);
     }
-}
-
-
-fn create_player(world: &mut World, pc: &mut usize, snap_camera: bool, location: Vector2) {
-    let psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
-
-    let pos = Position::new(location.x as f32, location.y as f32);
-    let player_scale: f64 = 0.4;
-    let scalable = Scalable::new(player_scale as f32, player_scale as f32);
-
-    let e = world
-        .create_entity()
-        .with(pos)
-        .with(Renderable {
-            layer: 5,
-            tpe: RenderableType::Animation {
-                id: "player-idle",
-                frame: 0,
-                length: 10,
-            },
-        })
-        .with(HasAnimationSequence { sequence: PlayerAnimations::idle() })
-        .with(Controlled)
-        .with(psm)
-        .with(StartPSM)
-        .with(Directional::Right)
-        .with(scalable)
-        .with(MovingObject::new(location))
-        .with(HasAABB::new(AABB::new_full(
-            Vector2::new(290.0, 500.0) * player_scale,
-            Vector2::new(0.7, 0.8),
-        )))
-        .with(CollisionDetection { group: 0 });
-
-    if snap_camera {
-        e.with(SnapCamera).build();
-    } else {
-        e.build();
-    }
-
-    *pc += 1;
-    println!("Players: {}", pc);
 }

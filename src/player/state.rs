@@ -20,7 +20,7 @@ impl State for Idle {
         _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::idle();
-        rend.tpe.set_animation_id(player::P_IDLE, 10);
+        rend.tpe.set_animation_id(player::animation_loader::P_IDLE, 10);
         // player.dj.enable();
     }
 
@@ -98,7 +98,7 @@ impl State for Running {
         _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::run();
-        rend.tpe.set_animation_id(player::P_RUN, 10);
+        rend.tpe.set_animation_id(player::animation_loader::P_RUN, 10);
         // player.dj.enable();
     }
 
@@ -178,7 +178,7 @@ impl State for Jumping {
         _pi: &PlayerInput,
         _delta: &DeltaTime,
     ) {
-        rend.tpe.set_animation_id(player::P_JUMP, 10);
+        rend.tpe.set_animation_id(player::animation_loader::P_JUMP, 10);
         if !bb.on_ground && bb.was_on_ground {
             bb.frames_from_jump_start = 0;
         }
@@ -305,7 +305,7 @@ impl State for Sliding {
         _delta: &DeltaTime,
     ) {
         anim.sequence = PlayerAnimations::slide();
-        rend.tpe.set_animation_id(player::P_SLIDE, 10);
+        rend.tpe.set_animation_id(player::animation_loader::P_SLIDE, 10);
     }
 
     fn handle_events(
@@ -377,7 +377,7 @@ impl State for Attacking {
         _pi: &PlayerInput,
         _delta: &DeltaTime,
     ) {
-        rend.tpe.set_animation_id(player::P_ATTACK, 10);
+        rend.tpe.set_animation_id(player::animation_loader::P_ATTACK, 10);
         anim.sequence = PlayerAnimations::attack();
     }
 

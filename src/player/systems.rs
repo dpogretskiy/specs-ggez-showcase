@@ -11,17 +11,15 @@ impl<'a> System<'a> for PlayerDirectionSystem {
      Fetch<'a, PlayerInput>);
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
-        (&mut directional, &controlled).par_join().for_each(
-            |(dir, _)| if input.left ^
-                input.right
-            {
-                if input.left {
-                    *dir = Directional::Left;
-                } else {
-                    *dir = Directional::Right;
-                }
-            },
-        );
+        (&mut directional, &controlled).par_join().for_each(|(dir, _)| if input.left ^
+            input.right
+        {
+            if input.left {
+                *dir = Directional::Left;
+            } else {
+                *dir = Directional::Right;
+            }
+        });
     }
 }
 
@@ -55,8 +53,6 @@ impl<'a> System<'a> for PlayerUpdateSystem {
             .for_each(|(_, sm, mv, bb, anim, rend, dir)| {
                 sm.machine.update(mv, bb, anim, rend, dir, &*input, &*time);
             })
-
-
     }
 }
 

@@ -4,34 +4,63 @@ pub mod animation_defs;
 pub mod state_machine;
 pub mod state;
 mod consts;
+mod animation_loader;
 
-use asset_storage::*;
-use ggez::{Context, GameResult};
-use sprite::Loader;
-use sprite::animation::Animation;
+use self::animation_defs::*;
+pub use self::animation_loader::AnimationLoader;
+pub use self::consts::*;
 
-pub struct PlayerLoader {}
-impl PlayerLoader {
-    pub fn load_assets(ctx: &mut Context, asset_storage: &mut AssetStorage) -> GameResult<()> {
-        let idle = Loader::load_sprite_sheet(ctx, "/idle")?;
-        let attacking = Loader::load_sprite_sheet(ctx, "/attack")?;
-        let jumping = Loader::load_sprite_sheet(ctx, "/jump")?;
-        let running = Loader::load_sprite_sheet(ctx, "/run")?;
-        let sliding = Loader::load_sprite_sheet(ctx, "/slide")?;
+use components::*;
+use physics::AABB;
+use specs::World;
+use util::Vector2;
 
-        asset_storage.animations.extend(vec![
-            (P_IDLE, Animation::new(idle)),
-            (P_ATTACK, Animation::new(attacking)),
-            (P_JUMP, Animation::new(jumping)),
-            (P_RUN, Animation::new(running)),
-            (P_SLIDE, Animation::new(sliding)),
-        ]);
-        Ok(())
+pub struct Player;
+impl Player {
+    pub fn spawn(
+        world: &mut World,
+        location: Vector2,
+        controlled: bool,
+        camera_snap: bool,
+        count: &mut usize,
+    ) {
+
+        let psm = PlayerStateMachine { machine: state_machine::StateMachine::new(state::Idle) };
+
+        let pos = Position::new(location.x as f32, location.y as f32);
+        let player_scale: f64 = 0.4;
+        let scalable = Scalable::new(player_scale as f32, player_scale as f32);
+
+        let e = world
+            .create_entity()
+            .with(pos)
+            .with(Renderable {
+                layer: 5,
+                tpe: RenderableType::Animation {
+                    id: "player-idle",
+                    frame: 0,
+                    length: 10,
+                },
+            })
+            .with(HasAnimationSequence { sequence: PlayerAnimations::idle() })
+            .with(psm)
+            .with(StartPSM)
+            .with(Directional::Right)
+            .with(scalable)
+            .with(MovingObject::new(location.clone()))
+            .with(HasAABB::new(AABB::new_full(
+                Vector2::new(290.0, 500.0) * player_scale,
+                Vector2::new(0.7, 0.8),
+            )))
+            .with(CollisionDetection { group: 0 });
+
+        let e = if camera_snap { e.with(SnapCamera) } else { e };
+
+        let e = if controlled { e.with(Controlled) } else { e };
+
+        e.build();
+
+        *count += 1;
+        println!("Players: {}", count);
     }
 }
-
-const P_IDLE: &str = "player-idle";
-const P_ATTACK: &str = "player-attack";
-const P_JUMP: &str = "player-jump";
-const P_RUN: &str = "player-run";
-const P_SLIDE: &str = "player-slide";

@@ -41,24 +41,56 @@ impl QuadTree {
 
         let level = self.level + 1;
 
-        self.nodes = Some(Box::new([
-            QuadTree::create(level, Volume::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Volume::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ]));
-        self.nodes = Some(Box::new([
-            QuadTree::create(level, Volume::new(x + sub_width, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y, sub_width, sub_height)),
-            QuadTree::create(level, Volume::new(x, y + sub_height, sub_width, sub_height)),
-            QuadTree::create(
-                level,
-                Volume::new(x + sub_width, y + sub_height, sub_width, sub_height),
-            ),
-        ]));
+        self.nodes = Some(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Volume::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        ));
+        self.nodes = Some(Box::new(
+            [
+                QuadTree::create(
+                    level,
+                    Volume::new(x + sub_width, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(x, y + sub_height, sub_width, sub_height),
+                ),
+                QuadTree::create(
+                    level,
+                    Volume::new(
+                        x + sub_width,
+                        y + sub_height,
+                        sub_width,
+                        sub_height,
+                    ),
+                ),
+            ],
+        ));
     }
 
     pub fn insert(&mut self, entity: Entity, rect: Volume) {
@@ -125,7 +157,7 @@ impl Volume {
 
     pub fn intersects(&self, other: &Volume) -> bool {
         !(self.x + self.w < other.x || other.x + other.w < self.x || self.y + self.h < other.y ||
-            other.y + other.h < self.y)
+              other.y + other.h < self.y)
     }
 
     pub fn center(&self) -> Vector2 {

@@ -155,17 +155,15 @@ impl<'a> System<'a> for CollisionSystem {
                     let force = 10000.0 * time.delta;
 
                     let velo_delta = dir * force;
-                    if velo_delta.x.is_nan() || velo_delta.x.abs() > 5000.0 ||
-                        velo_delta.x.abs() < 1.0 ||
-                        velo_delta.y.is_nan() || velo_delta.y.abs() < 5.0 ||
-                        velo_delta.y.abs() > 5000.0
+                    if (velo_delta.x.is_nan() || velo_delta.x.abs() > 50000.0) &&
+                        (velo_delta.y.is_nan() || velo_delta.y.abs() > 50000.0)
                     {
                         mv.velocity += Vector2::new(
                             rand::random::<f64>() - 0.5,
                             rand::random::<f64>() - 0.5,
                         ).normalize() * force;
                     } else {
-                        mv.velocity -= velo_delta;
+                        mv.velocity += velo_delta;
                     }
                 }
             }

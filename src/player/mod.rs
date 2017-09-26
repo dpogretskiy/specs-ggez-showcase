@@ -56,9 +56,10 @@ impl Player {
 
         let e = if camera_snap { e.with(SnapCamera) } else { e };
 
-        let e = if controlled { e.with(Controlled) } else { e };
+        // let e = if controlled { e.with(Controlled) } else { e };
+        // e.build();
 
-        e.build();
+        e.with(Controlled).build();
 
         *count += 1;
         println!("Players: {}", count);

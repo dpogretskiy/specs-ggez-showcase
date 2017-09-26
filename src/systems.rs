@@ -22,13 +22,15 @@ impl<'c> RenderingSystem<'c> {
 }
 
 impl<'a, 'c> System<'a> for RenderingSystem<'c> {
-    type SystemData = (Entities<'a>,
-     FetchMut<'a, AssetStorage>,
-     Fetch<'a, Camera>,
-     ReadStorage<'a, Renderable>,
-     ReadStorage<'a, Position>,
-     ReadStorage<'a, Scalable>,
-     ReadStorage<'a, Directional>);
+    type SystemData = (
+        Entities<'a>,
+        FetchMut<'a, AssetStorage>,
+        Fetch<'a, Camera>,
+        ReadStorage<'a, Renderable>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Scalable>,
+        ReadStorage<'a, Directional>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (entities, mut assets, camera, renderable, position, scalable, directional) = data;
@@ -76,32 +78,28 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
                             }
                         }
                     }
-                    RenderableType::Image { id } => {
-                        if let Some(i) = assets.images.get(id) {
-                            i.draw_ex_camera(
-                                &*camera,
-                                self.ctx,
-                                DrawParam {
-                                    dest: Point2::new(pos.x, pos.y),
-                                    scale: Point2::new(scale.x, scale.y),
-                                    ..Default::default()
-                                },
-                            ).unwrap();
-                        }
-                    }
-                    RenderableType::Batch { id } => {
-                        if let Some(b) = assets.batches.get(id) {
-                            b.draw_ex_camera(
-                                &*camera,
-                                self.ctx,
-                                DrawParam {
-                                    dest: Point2::new(pos.x, pos.y),
-                                    scale: Point2::new(scale.x, scale.y),
-                                    ..Default::default()
-                                },
-                            ).unwrap();
-                        }
-                    }
+                    RenderableType::Image { id } => if let Some(i) = assets.images.get(id) {
+                        i.draw_ex_camera(
+                            &*camera,
+                            self.ctx,
+                            DrawParam {
+                                dest: Point2::new(pos.x, pos.y),
+                                scale: Point2::new(scale.x, scale.y),
+                                ..Default::default()
+                            },
+                        ).unwrap();
+                    },
+                    RenderableType::Batch { id } => if let Some(b) = assets.batches.get(id) {
+                        b.draw_ex_camera(
+                            &*camera,
+                            self.ctx,
+                            DrawParam {
+                                dest: Point2::new(pos.x, pos.y),
+                                scale: Point2::new(scale.x, scale.y),
+                                ..Default::default()
+                            },
+                        ).unwrap();
+                    },
                 }
             }
         }
@@ -125,7 +123,11 @@ impl<'a, 'c> System<'a> for RenderingSystem<'c> {
 
 pub struct CameraSnapSystem;
 impl<'a> System<'a> for CameraSnapSystem {
-    type SystemData = (FetchMut<'a, Camera>, ReadStorage<'a, Position>, ReadStorage<'a, SnapCamera>);
+    type SystemData = (
+        FetchMut<'a, Camera>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, SnapCamera>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut camera, position, snap) = data;
@@ -138,7 +140,11 @@ impl<'a> System<'a> for CameraSnapSystem {
 
 pub struct ChaseCameraSystem;
 impl<'a> System<'a> for ChaseCameraSystem {
-    type SystemData = (Fetch<'a, Camera>, ReadStorage<'a, ChaseCamera>, WriteStorage<'a, Position>);
+    type SystemData = (
+        Fetch<'a, Camera>,
+        ReadStorage<'a, ChaseCamera>,
+        WriteStorage<'a, Position>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (cam, chase, mut pos) = data;
@@ -153,7 +159,10 @@ impl<'a> System<'a> for ChaseCameraSystem {
 
 pub struct AnimationFFSystem;
 impl<'a> System<'a> for AnimationFFSystem {
-    type SystemData = (WriteStorage<'a, HasAnimationSequence>, WriteStorage<'a, Renderable>);
+    type SystemData = (
+        WriteStorage<'a, HasAnimationSequence>,
+        WriteStorage<'a, Renderable>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut anim, mut rend) = data;

@@ -6,32 +6,36 @@ use specs::*;
 
 pub struct PlayerDirectionSystem;
 impl<'a> System<'a> for PlayerDirectionSystem {
-    type SystemData = (WriteStorage<'a, Directional>,
-     ReadStorage<'a, Controlled>,
-     Fetch<'a, PlayerInput>);
+    type SystemData = (
+        WriteStorage<'a, Directional>,
+        ReadStorage<'a, Controlled>,
+        Fetch<'a, PlayerInput>,
+    );
 
     fn run(&mut self, (mut directional, controlled, input): Self::SystemData) {
-        (&mut directional, &controlled).par_join().for_each(|(dir, _)| if input.left ^
-            input.right
-        {
-            if input.left {
-                *dir = Directional::Left;
-            } else {
-                *dir = Directional::Right;
-            }
-        });
+        (&mut directional, &controlled).par_join().for_each(
+            |(dir, _)| if input.left ^ input.right {
+                if input.left {
+                    *dir = Directional::Left;
+                } else {
+                    *dir = Directional::Right;
+                }
+            },
+        );
     }
 }
 
-type SMSD<'a> = (ReadStorage<'a, Controlled>,
-                 WriteStorage<'a, PlayerStateMachine>,
-                 WriteStorage<'a, MovingObject>,
-                 WriteStorage<'a, HasAABB>,
-                 WriteStorage<'a, HasAnimationSequence>,
-                 WriteStorage<'a, Renderable>,
-                 WriteStorage<'a, Directional>,
-                 Fetch<'a, PlayerInput>,
-                 Fetch<'a, DeltaTime>);
+type SMSD<'a> = (
+    ReadStorage<'a, Controlled>,
+    WriteStorage<'a, PlayerStateMachine>,
+    WriteStorage<'a, MovingObject>,
+    WriteStorage<'a, HasAABB>,
+    WriteStorage<'a, HasAnimationSequence>,
+    WriteStorage<'a, Renderable>,
+    WriteStorage<'a, Directional>,
+    Fetch<'a, PlayerInput>,
+    Fetch<'a, DeltaTime>,
+);
 
 
 pub struct PlayerUpdateSystem;
@@ -102,30 +106,34 @@ impl<'a> System<'a> for PlayerHandleEventsSystem {
 
 pub struct StartPSMSystem;
 impl<'a> System<'a> for StartPSMSystem {
-    type SystemData = (Entities<'a>,
-     WriteStorage<'a, StartPSM>,
-     ReadStorage<'a, Controlled>,
-     WriteStorage<'a, PlayerStateMachine>,
-     WriteStorage<'a, MovingObject>,
-     WriteStorage<'a, HasAABB>,
-     WriteStorage<'a, HasAnimationSequence>,
-     WriteStorage<'a, Renderable>,
-     WriteStorage<'a, Directional>,
-     Fetch<'a, PlayerInput>,
-     Fetch<'a, DeltaTime>);
+    type SystemData = (
+        Entities<'a>,
+        WriteStorage<'a, StartPSM>,
+        ReadStorage<'a, Controlled>,
+        WriteStorage<'a, PlayerStateMachine>,
+        WriteStorage<'a, MovingObject>,
+        WriteStorage<'a, HasAABB>,
+        WriteStorage<'a, HasAnimationSequence>,
+        WriteStorage<'a, Renderable>,
+        WriteStorage<'a, Directional>,
+        Fetch<'a, PlayerInput>,
+        Fetch<'a, DeltaTime>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (e,
-             mut start,
-             controlled,
-             mut sm,
-             mut mv,
-             mut bb,
-             mut anim,
-             mut rend,
-             dir,
-             input,
-             time) = data;
+        let (
+            e,
+            mut start,
+            controlled,
+            mut sm,
+            mut mv,
+            mut bb,
+            mut anim,
+            mut rend,
+            dir,
+            input,
+            time,
+        ) = data;
 
         let mut rem = vec![];
 
@@ -164,22 +172,18 @@ pub struct PlayerAux;
 impl PlayerAux {
     pub fn movement(mv: &mut MovingObject, bb: &HasAABB, direction: &Directional) {
         match *direction {
-            Directional::Left => {
-                if bb.pushes_left_wall {
-                    PlayerAux::stop(mv);
-                } else {
-                    mv.accel.x = -PC::WALK_ACCEL;
-                    mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
-                }
-            }
-            Directional::Right => {
-                if bb.pushes_right_wall {
-                    PlayerAux::stop(mv);
-                } else {
-                    mv.accel.x = PC::WALK_ACCEL;
-                    mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
-                }
-            }
+            Directional::Left => if bb.pushes_left_wall {
+                PlayerAux::stop(mv);
+            } else {
+                mv.accel.x = -PC::WALK_ACCEL;
+                mv.velocity.x = (-PC::WALK_SPEED / 2.0).min(mv.velocity.x).max(-PC::WALK_SPEED);
+            },
+            Directional::Right => if bb.pushes_right_wall {
+                PlayerAux::stop(mv);
+            } else {
+                mv.accel.x = PC::WALK_ACCEL;
+                mv.velocity.x = (PC::WALK_SPEED / 2.0).max(mv.velocity.x).min(PC::WALK_SPEED);
+            },
         }
     }
 
@@ -198,7 +202,7 @@ impl PlayerAux {
                 PlayerAux::stop(mv);
             }
         } else {
-            mv.accel.x = -mv.velocity.x / 2.0;
+            mv.accel.x = -mv.velocity.x * 2.0;
         }
     }
 }

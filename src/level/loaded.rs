@@ -5,7 +5,6 @@ use sprite::Loader;
 use ggez::Context;
 use ggez::graphics::Image;
 
-
 pub struct LoadedAssets {
     pub ground: MarkedTiles,
     pub objects: MarkedTiles,

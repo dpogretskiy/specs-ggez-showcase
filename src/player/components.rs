@@ -14,3 +14,13 @@ pub struct PlayerStateMachine {
 #[derive(Component, Default)]
 #[component(HashMapStorage)]
 pub struct StartPSM;
+
+// #[derive(Component)]
+// #[component(DenseVecStorage)]
+// pub struct PlayerStats {
+//     pub health: f64,
+//     pub damage: f64,
+//     pub abilities: Vec<Ability>,
+//     pub buffs: Vec<Buff>,
+//     pub inventory: [4; [3; Item]],
+// }

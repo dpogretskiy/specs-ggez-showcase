@@ -39,28 +39,26 @@ impl LevelAssetIndex {
 
         for gd in loaded.ground.data.iter() {
             match &gd.markers {
-                &SpriteType::Ground { square: ref sqr } => {
-                    for s in sqr.iter() {
-                        let mut p = true;
-                        {
-                            let entry = ground_sqr.get_mut(s);
-                            if let Some(e) = entry {
-                                e.push(gd.on_screen_frame.clone());
-                                p = false;
-                            };
-                        }
-                        if p {
-                            ground_sqr.insert(s.clone(), vec![gd.on_screen_frame.clone()]);
+                &SpriteType::Ground { square: ref sqr } => for s in sqr.iter() {
+                    let mut p = true;
+                    {
+                        let entry = ground_sqr.get_mut(s);
+                        if let Some(e) = entry {
+                            e.push(gd.on_screen_frame.clone());
+                            p = false;
                         };
                     }
-                }
-                &SpriteType::Platform { horizontal: ref hor } => {
-                    for h in hor.iter() {
-                        platform_hor.entry(h.clone()).or_insert({
-                            vec![gd.on_screen_frame.clone()]
-                        });
-                    }
-                }
+                    if p {
+                        ground_sqr.insert(s.clone(), vec![gd.on_screen_frame.clone()]);
+                    };
+                },
+                &SpriteType::Platform {
+                    horizontal: ref hor,
+                } => for h in hor.iter() {
+                    platform_hor
+                        .entry(h.clone())
+                        .or_insert({ vec![gd.on_screen_frame.clone()] });
+                },
                 &SpriteType::Object => ground_obj.push(gd.on_screen_frame.clone()),
             }
         }
@@ -78,7 +76,9 @@ impl LevelAssetIndex {
                 ground: ground_obj,
                 surface: surface_obj,
             },
-            platforms: PlatformIndex { horizontal: platform_hor },
+            platforms: PlatformIndex {
+                horizontal: platform_hor,
+            },
         };
 
         index
@@ -100,7 +100,6 @@ impl LevelAssetIndex {
         random_from(&r)
     }
 }
-
 
 fn random_from<T: Clone>(from: &Vec<T>) -> Option<T> {
     if from.len() > 0 {

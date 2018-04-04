@@ -18,7 +18,6 @@ use marker::{Horizontal, Square};
 pub use self::loaded::*;
 pub use self::terrain::*;
 
-
 use self::index::LevelAssetIndex;
 
 pub enum LevelType {
@@ -91,7 +90,6 @@ impl RenderableLevel {
         let o_batch = SpriteBatch::new(assets.objects.image);
         let bg = assets.background;
 
-
         let mut terrain_vec: Vec<Vec<TileType>> = vec![];
 
         let height = terrain_data.len();
@@ -109,7 +107,6 @@ impl RenderableLevel {
                     _ => h_vec.push(TileType::Empty),
                 }
             }
-
 
             h_vec.shrink_to_fit();
             terrain_vec.push(h_vec);

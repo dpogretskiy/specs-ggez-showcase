@@ -34,7 +34,6 @@ impl From<ggez::graphics::Rect> for Rect {
             w: r.w,
             h: r.h,
         }
-
     }
 }
 

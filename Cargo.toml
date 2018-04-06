@@ -23,5 +23,8 @@ features = ["cargo-resource-root"]
 [profile.release]
 codegen-units = 1
 
+[profile.dev]
+opt-level = 2
+
 [features]
 cargo-resource-root = []
